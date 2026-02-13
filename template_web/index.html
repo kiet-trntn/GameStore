@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameX Pro | Premium Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #050507; /* Đen sâu hơn một chút */
+            color: #eee;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(29, 78, 216, 0.03) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+        .glass {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(30px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow:
+                inset 0 1px rgba(255,255,255,0.05),
+                0 20px 40px rgba(0,0,0,0.5);
+        }
+        /* Hiệu ứng hạt bụi nhỏ (tùy chọn) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* Gradient Mesh Background */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: radial-gradient(at 20% 20%, rgba(37,99,235,0.15), transparent 40%),
+                        radial-gradient(at 80% 30%, rgba(59,130,246,0.12), transparent 40%),
+                        radial-gradient(at 50% 80%, rgba(99,102,241,0.12), transparent 40%);
+            animation: meshMove 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshMove {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-30px) scale(1.05); }
+        }
+
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <div class="bg-mesh"></div>
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full"></div>
+        
+        <div class="absolute top-[40%] right-[-5%] w-[600px] h-[600px] bg-blue-900/10 blur-[150px] rounded-full"></div>
+        
+        <div class="absolute bottom-[-10%] left-[20%] w-[700px] h-[700px] bg-blue-500/5 blur-[130px] rounded-full"></div>
+    </div>
+
+
+    <!-- Header -->
+    <div class="fixed w-full z-[100] px-4 md:px-10 pt-6">
+        <nav class="max-w-7xl mx-auto glass rounded-2xl py-3 px-6 flex justify-between items-center shadow-2xl shadow-black/50 border border-white/10">
+            <div class="text-2xl font-bold tracking-tighter flex items-center gap-2">
+                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white italic shadow-lg shadow-blue-500/20">G</div>
+                <span class="text-white hidden sm:block">GAMEX</span>
+            </div>
+    
+            <div class="hidden lg:flex items-center gap-10 text-[13px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                <a href="#" class="text-blue-500 border-b-2 border-blue-500 pb-1">Cửa hàng</a>
+                <a href="#" class="hover:text-white transition-colors duration-300">Khám phá</a>
+                <a href="#" class="hover:text-white transition-colors duration-300">Tin tức</a>
+                <a href="#" class="hover:text-white transition-colors duration-300">Cộng đồng</a>
+            </div>
+    
+            <div class="flex items-center gap-3">
+                <div class="relative hidden xl:block">
+                    <input type="text" placeholder="Tìm kiếm siêu phẩm..." 
+                           class="bg-white/5 border border-white/5 rounded-xl py-2.5 px-5 text-xs focus:outline-none focus:border-blue-500/50 w-64 focus:w-80 transition-all duration-500">
+                    <span class="absolute right-4 top-2.5 text-gray-500">⌘K</span>
+                </div>
+                
+                <div class="flex items-center gap-2 ml-2">
+                    <button class="p-2.5 hover:bg-white/5 rounded-xl transition-all text-gray-400 hover:text-white relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-[#08080a]"></span>
+                    </button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                        Đăng nhập
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Khám phá danh mục -->
+    <section class="pt-28 pb-8">
+        <div class="container mx-auto px-4 md:px-10">
+            <div class="swiper mainHeroSwiper rounded-[2rem] overflow-hidden shadow-2xl relative border border-white/5">
+                <div class="swiper-wrapper">
+                    
+                    <div class="swiper-slide relative h-[450px] md:h-[600px] overflow-hidden group">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920" 
+                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-[5000ms] group-active:scale-110 scale-105">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent opacity-90"></div>
+                        <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16 lg:p-24">
+                            <div class="max-w-2xl transform transition-all duration-700">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="h-[1px] w-8 bg-blue-500"></span>
+                                    <span class="text-blue-400 text-xs font-bold tracking-[0.3em] uppercase">Trending Now</span>
+                                </div>
+                                <h2 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-none text-white">
+                                    ELDER REALM <br>
+                                    <span class="font-extralight italic">AWAKENING</span>
+                                </h2>
+                                <div class="flex items-center gap-6">
+                                    <button class="bg-white text-black px-8 py-3.5 rounded-full font-bold text-sm hover:bg-blue-500 hover:text-white transition-all duration-300 shadow-xl">
+                                        Mua Ngay — 599k
+                                    </button>
+                                    <button class="text-white text-sm font-semibold flex items-center gap-2 hover:gap-4 transition-all">
+                                        Xem chi tiết <span>→</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="swiper-slide relative h-[450px] md:h-[600px] overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=1920" 
+                             class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent"></div>
+                        <div class="absolute inset-0 flex flex-col justify-center p-8 md:p-16 lg:p-24">
+                            <div class="max-w-xl">
+                                <span class="inline-block px-3 py-1 rounded-md border border-red-500/50 text-red-500 text-[10px] font-bold mb-4 uppercase">Flash Sale -50%</span>
+                                <h2 class="text-4xl md:text-6xl font-bold mb-6 tracking-tighter text-white">CYBER STRIKE</h2>
+                                <p class="text-gray-400 text-sm md:text-base mb-8 line-clamp-2 max-w-sm">Dấn thân vào cuộc chiến tương lai đầy kịch tính với đồ họa thế hệ mới.</p>
+                                <button class="bg-blue-600 px-8 py-3.5 rounded-full font-bold text-sm hover:scale-105 transition-transform shadow-lg shadow-blue-500/20">
+                                    Săn Deal Ngay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+    
+                <div class="swiper-pagination !bottom-8 !text-left !px-16 container"></div>
+                
+                <div class="absolute top-1/2 -translate-y-1/2 right-8 flex flex-col gap-4 z-10 hidden md:flex">
+                    <div class="swiper-button-next !static !w-10 !h-10 !m-0 after:!text-xs border border-white/10 rounded-full bg-white/5 hover:bg-white/20 transition backdrop-blur-md"></div>
+                    <div class="swiper-button-prev !static !w-10 !h-10 !m-0 after:!text-xs border border-white/10 rounded-full bg-white/5 hover:bg-white/20 transition backdrop-blur-md"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SlideShow -->
+    <section class="container mx-auto px-4 md:px-10 py-12">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h2 class="text-3xl font-extrabold tracking-tight text-white uppercase italic">Khám phá <span class="text-blue-500 underline decoration-2 underline-offset-8">Danh mục</span></h2>
+                <p class="text-gray-500 text-sm mt-2">Tìm kiếm phong cách chơi game riêng của bạn</p>
+            </div>
+            <div class="hidden md:flex gap-2">
+                <div class="w-12 h-[2px] bg-blue-600"></div>
+                <div class="w-4 h-[2px] bg-white/20"></div>
+            </div>
+        </div>
+    
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            
+            <a href="#" class="col-span-2 md:col-span-2 lg:col-span-2 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
+                <img src="https://images.unsplash.com/photo-1552824730-10360ec57a1b?auto=format&fit=crop&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Action">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6">
+                    <h3 class="text-xl font-bold text-white tracking-wide">Hành Động</h3>
+                    <p class="text-blue-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest mt-1">120+ Trò chơi →</p>
+                </div>
+            </a>
+    
+            <a href="#" class="col-span-1 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="RPG">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6">
+                    <h3 class="text-lg font-bold text-white">Nhập Vai</h3>
+                </div>
+            </a>
+    
+            <a href="#" class="col-span-1 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
+                <img src="https://images.unsplash.com/photo-1580234811497-9bd7fd0f5ee6?auto=format&fit=crop&w=400" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Indie">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6">
+                    <h3 class="text-lg font-bold text-white">Indie</h3>
+                </div>
+            </a>
+    
+            <a href="#" class="col-span-2 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
+                <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Sports">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                <div class="absolute inset-x-0 bottom-0 p-6 text-right">
+                    <h3 class="text-xl font-bold text-white uppercase italic tracking-tighter">Thể Thao</h3>
+                    <p class="text-gray-400 text-[10px] mt-1 uppercase tracking-[0.2em]">Cảm giác mạnh</p>
+                </div>
+            </a>
+    
+        </div>
+    </section>
+
+    <!-- Game hot trong tuần -->
+    <section class="container mx-auto px-4 md:px-10 py-16 relative z-10">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-1.5 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
+                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase italic">Hot <span class="text-gray-500 font-light">Tuần Này</span></h2>
+            </div>
+            
+            <div class="flex gap-3">
+                <button class="hot-prev w-11 h-11 glass rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button class="hot-next w-11 h-11 glass rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </div>
+    
+        <div class="swiper hotGamesSwiper !overflow-visible">
+            <div class="swiper-wrapper">
+                
+                <div class="swiper-slide group">
+                    <div class="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1605898835373-02f74446e8ea?auto=format&fit=crop&w=600" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent opacity-90"></div>
+                        
+                        <div class="absolute top-4 left-4">
+                            <span class="glass px-3 py-1 rounded-lg text-[10px] font-black text-blue-400 uppercase tracking-tighter border border-blue-400/20 shadow-lg">Trending</span>
+                        </div>
+    
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <h3 class="text-lg font-bold text-white mb-2 leading-tight line-clamp-2 group-hover:text-blue-400 transition-colors">Viking's Destiny</h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-400 font-black text-base">850k <span class="text-[10px] font-normal text-gray-500 italic">đ</span></span>
+                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 4v16m8-8H4" stroke-width="3"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="swiper-slide group">
+                    <div class="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] transition-all duration-500 group-hover:-translate-y-2">
+                        <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=600" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent"></div>
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <h3 class="text-lg font-bold text-white mb-2 line-clamp-2">Neon Syndicate</h3>
+                            <span class="text-blue-400 font-black text-base">1.050k đ</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="swiper-slide group">
+                    <div class="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] transition-all duration-500 group-hover:-translate-y-2">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent"></div>
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <h3 class="text-lg font-bold text-white mb-2">Cyber Strike</h3>
+                            <span class="text-blue-400 font-black text-base">550k đ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="swiper-slide group">
+                    <div class="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] transition-all duration-500 group-hover:-translate-y-2">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent"></div>
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <h3 class="text-lg font-bold text-white mb-2">Gears of Future</h3>
+                            <span class="text-blue-400 font-black text-base">750k đ</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="swiper-slide group">
+                    <div class="relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] transition-all duration-500 group-hover:-translate-y-2">
+                        <img src="https://images.unsplash.com/photo-1614332287897-cdc485fa562d?auto=format&fit=crop&w=600" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent"></div>
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <h3 class="text-lg font-bold text-white mb-2">Apex Frontier</h3>
+                            <span class="text-blue-400 font-black text-base">1.250k đ</span>
+                        </div>
+                    </div>
+                </div>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner quảng cáo -->
+    <section class="container mx-auto px-4 md:px-10 py-12">
+        <div class="relative w-full min-h-[350px] md:h-[450px] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group bg-[#0a0a0c]">
+            
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920" 
+                 class="absolute inset-0 w-full h-full object-cover opacity-60 scale-105 group-hover:scale-110 transition-transform duration-[3000ms]">
+            
+            <div class="absolute inset-0 bg-gradient-to-r from-[#08080a] via-[#08080a]/80 to-blue-600/10"></div>
+            
+            <div class="absolute inset-0 flex flex-col md:flex-row items-center justify-between px-8 md:px-20 py-10 gap-10">
+                
+                <div class="max-w-xl z-10 text-center md:text-left">
+                    <div class="inline-flex items-center gap-2 bg-blue-600/20 backdrop-blur-xl border border-blue-500/30 px-4 py-2 rounded-2xl mb-6">
+                        <span class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-400">Đặc quyền Premium</span>
+                    </div>
+                    
+                    <h2 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter leading-[1.1]">
+                        NÂNG CẤP <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">TRẢI NGHIỆM</span>
+                    </h2>
+                    
+                    <p class="text-gray-400 text-sm md:text-base mb-8 max-w-md leading-relaxed">
+                        Chỉ từ <span class="text-white font-bold">99k/tháng</span>, nhận ngay kho game 500+ tựa game bom tấn, giảm giá độc quyền và quà tặng vật phẩm hàng tuần.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <button class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-bold text-sm transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-blue-500/60">
+                            Đăng ký ngay — Miễn phí 7 ngày
+                        </button>
+                        <a href="#" class="text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Xem bảng giá</a>
+                    </div>
+                </div>
+    
+                <div class="hidden lg:grid grid-cols-2 gap-4 z-10">
+                    <div class="glass p-5 rounded-[2rem] border-white/5 flex flex-col items-center text-center w-40">
+                        <span class="text-2xl mb-2">🎮</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">500+ Games</span>
+                    </div>
+                    <div class="glass p-5 rounded-[2rem] border-white/5 flex flex-col items-center text-center w-40 mt-8">
+                        <span class="text-2xl mb-2">💎</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Vật phẩm hiếm</span>
+                    </div>
+                    <div class="glass p-5 rounded-[2rem] border-white/5 flex flex-col items-center text-center w-40">
+                        <span class="text-2xl mb-2">⚡</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Ưu tiên tải</span>
+                    </div>
+                    <div class="glass p-5 rounded-[2rem] border-white/5 flex flex-col items-center text-center w-40 mt-8">
+                        <span class="text-2xl mb-2">🎁</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase">Quà sinh nhật</span>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="absolute -top-20 -right-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-600/10 blur-[100px] rounded-full"></div>
+        </div>
+    </section>
+
+    <!-- Highlight game -->
+    <section class="container mx-auto px-4 md:px-10 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            
+            <div class="space-y-6">
+                <div class="group flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl mb-8 shadow-lg shadow-black/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-6 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                        <h3 class="text-lg font-black text-white uppercase tracking-tighter italic">Game Mới</h3>
+                    </div>
+                    <a href="#" class="text-[10px] font-bold text-gray-500 hover:text-green-400 uppercase tracking-widest transition-colors">Tất cả</a>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150" class="w-16 h-20 object-cover rounded-xl">
+                        <div class="flex-grow">
+                            <h4 class="text-sm font-bold text-white group-hover:text-green-400">Dragon Age</h4>
+                            <span class="text-sm font-black text-blue-400">1.250k đ</span>
+                        </div>
+                    </a>
+                    </div>
+            </div>
+    
+            <div class="space-y-6">
+                <div class="group flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl mb-8 shadow-lg shadow-black/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-6 bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
+                        <h3 class="text-lg font-black text-white uppercase tracking-tighter italic">Game Hot</h3>
+                    </div>
+                    <a href="#" class="text-[10px] font-bold text-gray-500 hover:text-orange-400 uppercase tracking-widest transition-colors">Phổ biến</a>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150" class="w-16 h-20 object-cover rounded-xl">
+                        <div class="flex-grow">
+                            <h4 class="text-sm font-bold text-white group-hover:text-orange-400">Black Myth</h4>
+                            <span class="text-sm font-black text-blue-400">950k đ</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="space-y-6">
+                <div class="group flex items-center justify-between bg-white/5 border border-white/10 p-4 rounded-2xl mb-8 shadow-lg shadow-black/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1.5 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                        <h3 class="text-lg font-black text-white uppercase tracking-tighter italic">Sắp Ra Mắt</h3>
+                    </div>
+                    <a href="#" class="text-[10px] font-bold text-gray-500 hover:text-blue-400 uppercase tracking-widest transition-colors">Lịch trình</a>
+                </div>
+                
+                <div class="flex flex-col gap-2">
+                    <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150" class="w-16 h-20 object-cover rounded-xl">
+                        <div class="flex-grow">
+                            <h4 class="text-sm font-bold text-white group-hover:text-blue-400">GTA VI</h4>
+                            <span class="text-xs text-red-400 font-bold">Coming 2026</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+    
+        </div>
+    </section>
+
+    <!-- Tin tức về game -->
+    <section class="container mx-auto px-4 md:px-10 py-16">
+        <div class="flex items-center justify-between mb-10">
+            <div class="flex items-center gap-4">
+                <div class="w-1.5 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
+                <h2 class="text-3xl font-extrabold tracking-tight text-white uppercase italic">Tin tức <span class="text-gray-500 font-light">Mới nhất</span></h2>
+            </div>
+            <button class="glass px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all">Tất cả bài viết</button>
+        </div>
+    
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <div class="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl h-[500px]">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/40 to-transparent"></div>
+                
+                <div class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-white">Sự kiện</span>
+                        <span class="text-gray-400 text-xs font-bold italic">03 Tháng 2, 2026</span>
+                    </div>
+                    <h3 class="text-3xl md:text-4xl font-black text-white mb-4 leading-tight group-hover:text-blue-400 transition-colors">
+                        Lễ trao giải Game of the Year 2026: Những ứng cử viên sáng giá nhất đã lộ diện
+                    </h3>
+                    <p class="text-gray-400 text-sm md:text-base line-clamp-2 max-w-2xl mb-6">
+                        Đêm vinh danh những siêu phẩm ngành game sắp bắt đầu. Cùng điểm qua danh sách những tựa game đang dẫn đầu cuộc đua năm nay...
+                    </p>
+                    <div class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
+                        Đọc tiếp <span>→</span>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                
+                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cập nhật</span>
+                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
+                            Bản cập nhật 2.0 của Cyber Strike: Thêm hệ thống Ray-tracing thế hệ mới
+                        </h4>
+                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">1 giờ trước</p>
+                    </div>
+                </a>
+    
+                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
+                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-purple-500 text-[10px] font-bold uppercase tracking-widest mb-1">Phần cứng</span>
+                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
+                            Lộ diện console thế hệ tiếp theo: Hiệu năng gấp đôi, hỗ trợ 8K Native
+                        </h4>
+                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">5 giờ trước</p>
+                    </div>
+                </a>
+    
+                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
+                        <img src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-green-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cộng đồng</span>
+                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
+                            Giải đấu E-Sports quốc tế sắp sửa đổ bộ vào Việt Nam vào mùa hè này
+                        </h4>
+                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">Hôm qua</p>
+                    </div>
+                </a>
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- footer -->
+    <footer class="container mx-auto px-4 md:px-10 pb-10 mt-20">
+        <div class="glass rounded-[2.5rem] p-10 md:p-16 border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
+            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-600/10 blur-[100px] rounded-full"></div>
+    
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10">
+                <div class="space-y-6">
+                    <div class="text-3xl font-bold tracking-tighter flex items-center gap-3">
+                        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white italic shadow-lg shadow-blue-500/30">G</div>
+                        <span class="text-white">GAMEX</span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Nền tảng phân phối game bản quyền hàng đầu, mang đến trải nghiệm giải trí đỉnh cao cho game thủ Việt.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-blue-600 hover:scale-110 transition-all shadow-lg">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-red-600 hover:scale-110 transition-all shadow-lg">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-indigo-600 hover:scale-110 transition-all shadow-lg">
+                            <i class="bi bi-discord"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <div>
+                    <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs">Khám phá</h4>
+                    <ul class="space-y-4 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Tất cả trò chơi</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Game Indie mới</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Phần mềm & Công cụ</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Thẻ quà tặng</a></li>
+                    </ul>
+                </div>
+    
+                <div>
+                    <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-xs">Hỗ trợ</h4>
+                    <ul class="space-y-4 text-sm text-gray-400 font-medium">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Trung tâm trợ giúp</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Chính sách hoàn tiền</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Trạng thái máy chủ</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Liên hệ bản quyền</a></li>
+                    </ul>
+                </div>
+    
+                <div class="space-y-6">
+                    <h4 class="text-white font-bold mb-2 uppercase tracking-widest text-xs">Đăng ký nhận tin</h4>
+                    <p class="text-gray-400 text-xs italic">Đừng bỏ lỡ các đợt Flash Sale cuối tuần!</p>
+                    <div class="relative group">
+                        <input type="email" placeholder="Email của bạn..." 
+                               class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-sm focus:outline-none focus:border-blue-500/50 transition-all outline-none">
+                        <button class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="mt-16 pt-8 border-t border-white/5 flex flex-col md:row justify-between items-center gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                <p>&copy; 2026 GAMEX STORE. MADE BY GAMERS FOR GAMERS.</p>
+                <div class="flex gap-8">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.mainHeroSwiper', {
+            loop: true,
+            speed: 1000, // Tăng tốc độ chuyển cảnh cho mượt
+            autoplay: { 
+                delay: 6000,
+                disableOnInteraction: false 
+            },
+            pagination: { 
+                el: '.swiper-pagination', 
+                clickable: true,
+                dynamicBullets: true // Bullet sẽ to nhỏ theo slide hiện tại
+            },
+            navigation: { 
+                nextEl: '.swiper-button-next', 
+                prevEl: '.swiper-button-prev' 
+            },
+            effect: 'fade',
+            fadeEffect: { crossFade: true }
+        });
+
+        // Khởi tạo Swiper cho Game Hot
+        const hotSwiper = new Swiper('.hotGamesSwiper', {
+            slidesPerView: 1.5, // Hiển thị 1 phần của slide tiếp theo để người dùng biết là lướt được
+            spaceBetween: 20,
+            centeredSlides: false,
+            grabCursor: true,
+            watchSlidesProgress: true,
+            navigation: {
+                nextEl: '.hot-next',
+                prevEl: '.hot-prev',
+            },
+            breakpoints: {
+                // Mobile lớn
+                480: {
+                    slidesPerView: 2.2,
+                },
+                // Tablet
+                768: {
+                    slidesPerView: 3.5,
+                },
+                // Desktop
+                1200: {
+                    slidesPerView: 5,
+                    spaceBetween: 25, // Tăng khoảng cách cho thoáng
+                }
+            }
+        });
+    </script>
+</body>
+</html>
