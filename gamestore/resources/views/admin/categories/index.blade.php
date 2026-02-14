@@ -8,19 +8,43 @@
         <h1 class="text-2xl font-bold text-gray-700">Danh mục Game</h1>
         
         <div class="flex items-center gap-2">
-            <form action="{{ route('admin.categories.index') }}" method="GET" class="relative">
-                <input type="text" 
-                       name="keyword" 
-                       value="{{ request('keyword') }}" 
-                       placeholder="Tìm kiếm danh mục..." 
-                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition w-64">
+            
+
+            
+            <form action="{{ route('admin.categories.index') }}" method="GET" class="flex items-center gap-2 m-0">
                 
-                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                {{-- 1. DROPDOWN LỌC TRẠNG THÁI --}}
+                <div class="relative">
+                    {{-- Thêm onchange="this.form.submit()" để tự gửi form khi chọn --}}
+                    <select name="status" onchange="this.form.submit()" 
+                            class="appearance-none pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition bg-white text-gray-700 cursor-pointer h-10">
+                        <option value="all">Tất cả trạng thái</option>
+                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Đang hiện</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Đang ẩn</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                    </div>
+                </div>
+                
+                {{-- 2. Ô TÌM KIẾM TỪ KHÓA --}}
+                <div class="relative">
+                    <input type="text" 
+                           name="keyword" 
+                           value="{{ request('keyword') }}" 
+                           placeholder="Tìm kiếm danh mục..." 
+                           class="pl-10 pr-4 h-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition w-64"> 
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                </div>
+
+            </form>
     
-                </form>
+            <a href="{{ route('admin.categories.trash') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold h-10 px-4 rounded-lg shadow-md transition duration-300 ml-2 flex items-center justify-center">
+                <i class="fas fa-trash-alt mr-2"></i> 
+            </a>
     
-            <button @click="openModal = true" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
-                <i class="fas fa-plus mr-2"></i> Thêm mới
+            <button @click="openModal = true" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-4 rounded-lg shadow-md transition duration-300 flex items-center justify-center">
+                <i class="fas fa-plus mr-2"></i> <span>Thêm mới</span>
             </button>
         </div>
     </div>
@@ -40,6 +64,7 @@
                     <th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider w-16">STT</th>
                     <th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Tên danh mục</th>
                     <th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Slug</th>
+                    <th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
                     <th class="px-6 py-4 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">Thao tác</th>
                 </tr>
             </thead>
@@ -52,6 +77,23 @@
                     </td>
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $category->name }}</td>
                     <td class="px-6 py-4 text-sm text-gray-500 italic">{{ $category->slug }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                class="sr-only peer" 
+                                {{ $category->is_active ? 'checked' : '' }}
+                                data-url="{{ route('admin.categories.toggle', $category->id) }}"
+                                onchange="toggleStatus(this)"
+                                autocomplete="off" {{-- <--- THÊM DÒNG NÀY VÀO --}}
+                            >
+                            
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                            
+                            <span class="ml-3 text-sm font-medium text-gray-900 status-text-{{ $category->id }}">
+                                {{ $category->is_active ? 'Hiện' : 'Ẩn' }}
+                            </span>
+                        </label>
+                    </td>
                     <td class="px-6 py-4 text-sm text-center space-x-2">
                         {{-- Nút Sửa: Truyền ID vào route --}}
                         <a href="{{ route('admin.categories.edit', $category->id) }}" class="text-blue-600 hover:text-blue-900 transition">
@@ -127,3 +169,57 @@
     </div>
 </div>
 @endsection
+
+<script>
+    function toggleStatus(checkbox) {
+        // 1. Lấy đường dẫn từ thuộng tính data-url
+        const url = checkbox.getAttribute('data-url');
+
+        fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json' // Bắt buộc Server trả về JSON
+            }
+        })
+        .then(response => {
+            // Kiểm tra xem phản hồi có ok không
+            if (!response.ok) {
+                throw new Error('Server returned ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === 'success') {
+                // Hiện thông báo thành công
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: data.message
+                });
+            }
+            else {
+                // Nếu backend báo lỗi logic
+                Swal.fire('Lỗi!', data.message || 'Không thể cập nhật.', 'error');
+                // Hoàn tác lại nút gạt nếu lỗi
+                checkbox.checked = !checkbox.checked;
+            }
+        })
+        .catch(error => {
+            console.error('Lỗi chi tiết:', error);
+            // Hiện thông báo lỗi rõ ràng hơn
+            Swal.fire('Lỗi hệ thống!', 'Vui lòng kiểm tra Console (F12) để xem chi tiết.', 'error');
+            
+            // Hoàn tác lại trạng thái nút gạt (tránh người dùng tưởng đã xong)
+            checkbox.checked = !checkbox.checked;
+        });
+    }
+</script>

@@ -88,6 +88,28 @@
                 }
             })
         }
+
+        
+        window.confirmForceDelete = function(event) {
+        event.preventDefault(); // 1. Chặn việc gửi form ngay lập tức
+        let form = event.target.closest('form'); // 2. Tìm cái form chứa nút bấm
+
+        Swal.fire({
+            title: 'Bạn có chắc chắn?',
+            text: "Dữ liệu sẽ không thể khôi phục! (Mất vĩnh viễn)",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6', // Màu xanh cho nút Đồng ý
+            cancelButtonColor: '#d33',    // Màu đỏ cho nút Hủy
+            confirmButtonText: 'Vâng, xóa nó!',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Nếu người dùng bấm "Vâng", lúc này mới gửi form đi
+                form.submit();
+            }
+        })
+    }
     </script>
 </body>
 </html>

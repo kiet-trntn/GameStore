@@ -4,33 +4,41 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str; // Dùng để tạo slug
+use Illuminate\Support\Str; 
 use App\Models\Category;
 
 class CategoryController extends Controller
 {
     // 1. Hiển thị danh sách
     public function index(Request $request) {
-        // 1. Lấy từ khóa tìm kiếm từ URL (VD: ?keyword=hanh+dong)
         $keyword = $request->input('keyword');
+        $status = $request->input('status');
 
-        // 2. Query Builder "Xịn"
-        $categories = Category::latest()
-            ->when($keyword, function ($query, $keyword) {
-                // Nếu có $keyword thì dòng này mới chạy
-                return $query->where('name', 'like', "%{$keyword}%");
-            })
-            ->paginate(5); // 3. Mỗi trang chỉ hiện 5 mục (Thay vì lấy hết)
+        $categories = Category::latest();
 
-        // 4. Giữ lại tham số tìm kiếm khi chuyển trang (Fix lỗi mất keyword khi qua trang 2)
-        $categories->appends(['keyword' => $keyword]);
+        // -- Lọc tìm kiếm từ khóa --
+        if ($keyword) {
+            $categories->where('name', 'like', "%{$keyword}%");
+        }
+
+        // -- Lọc trạng thái (ĐÃ SỬA: Dùng if thay vì when để tránh lỗi logic số 0) --
+        if ($status !== null && $status !== 'all') {
+            $categories->where('is_active', $status);
+        }
+
+        $categories = $categories->paginate(5); 
+
+        // Giữ lại tham số khi chuyển trang
+        $categories->appends([
+            'keyword' => $keyword,
+            'status' => $status
+        ]);
 
         return view('admin.categories.index', compact('categories'));
     }
 
     // 2. Lưu danh mục mới
     public function store(Request $request) {
-        // Validation: Đảm bảo không trùng tên, không để trống
         $request->validate([
             'name' => 'required|unique:categories,name|max:50',
         ], [
@@ -38,17 +46,15 @@ class CategoryController extends Controller
             'name.unique' => 'Tên danh mục này đã tồn tại.',
         ]);
 
-        // Tạo dữ liệu
         Category::create([
             'name' => $request->name,
-            'slug' => Str::slug($request->name), // Tự động tạo slug (Ví dụ: "Hành động" -> "hanh-dong")
+            'slug' => Str::slug($request->name),
         ]);
 
-        // Quay lại trang trước kèm thông báo
         return redirect()->route('admin.categories.index')->with('success', 'Đã thêm danh mục mới thành công!');
     }
 
-    // 3. Xóa danh mục
+    // 3. Xóa mềm danh mục (vào thùng rác)
     public function destroy($id) {
         $category = Category::findOrFail($id);
         $category->delete();
@@ -56,31 +62,77 @@ class CategoryController extends Controller
         return redirect()->back()->with('success', 'Đã xóa danh mục thành công!');
     }
 
-    // 4. Hiển thị form sữa
+    // 4. Hiển thị form sửa
     public function edit($id) {
-        // Tìm danh mục theo ID, nếu không thấy sẽ báo lỗi 404
         $category = Category::findOrFail($id);
-
-        // Trả về view sữa và truyền dữ liệu category sang
         return view('admin.categories.edit', compact('category'));
     }
 
-    // 5. Cập nhật dữ liệu vào db
+    // 5. Cập nhật dữ liệu
     public function update(Request $request, $id) {
         $category = Category::findOrFail($id);
 
-        // Validate: Tên bắt buộc, và không được trùng
         $request->validate([
             'name' => 'required|max:50|unique:categories,name,'. $id,
         ]);
 
-        // Cập nhật
         $category->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name)
         ]);
 
-        // Chuyển hướng về trang danh sách và báo thành công
         return redirect()->route('admin.categories.index')->with('success', 'Đã cập nhật danh mục thành công!');
+    }
+
+    // 6. Thùng rác
+    public function trash() {
+        $categories = Category::onlyTrashed()->latest()->paginate(5);
+        return view('admin.categories.trash', compact('categories'));
+    }
+
+    // 7. Khôi phục
+    public function restore($id) {
+        $category = Category::withTrashed()->find($id);
+        
+        if ($category) {
+            $category->restore(); 
+            return redirect()->back()->with('success', 'Đã khôi phục danh mục thành công!');
+        }
+        
+        return redirect()->back()->with('error', 'Không tìm thấy danh mục!');
+    }
+
+    // 8. Xóa vĩnh viễn 
+    public function forceDelete($id) {
+        $category = Category::withTrashed()->find($id);
+        
+        if ($category) {
+            $category->forceDelete(); 
+            return redirect()->back()->with('success', 'Đã xóa vĩnh viễn danh mục!');
+        }
+
+        return redirect()->back()->with('error', 'Không tìm thấy danh mục!');
+    }
+
+    // 9. Bật tắt trạng thái (AJAX) - ĐÃ SỬA LỖI
+    public function toggleStatus($id) {
+        $category = Category::find($id);
+
+        // SỬA 1: Thêm dấu $ vào trước biến category
+        if (!$category) {
+            // SỬA 2: Sửa chữ 'respone' thành 'response'
+            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy danh mục!'], 404);
+        }
+
+        // Đảo ngược trạng thái: Đang 1 thành 0, đang 0 thành 1
+        $category->is_active = !$category->is_active;
+        $category->save();
+
+        // Trả về JSON để Javascript bên View nhận được
+        return response()->json([
+            'status' => 'success',
+            'message' => $category->is_active ? 'Đã hiện danh mục!' : 'Đã ẩn danh mục!',
+            'new_state' => $category->is_active
+        ]);
     }
 }
