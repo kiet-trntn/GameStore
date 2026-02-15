@@ -43,6 +43,24 @@
                     </div>
                 </div>
 
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
+                    <h2 class="text-lg font-bold mb-4 text-gray-700">Thông tin bổ sung</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nhà phát triển</label>
+                            <input type="text" name="developer" class="w-full border border-gray-300 rounded-lg p-2 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Giá khuyến mãi (nếu có)</label>
+                            <input type="number" name="sale_price" class="w-full border border-gray-300 rounded-lg p-2 outline-none border-green-200 bg-green-50">
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cấu hình yêu cầu</label>
+                            <textarea name="requirements" rows="3" class="w-full border border-gray-300 rounded-lg p-2 outline-none" placeholder="CPU: i5, RAM: 8GB, VGA: GTX 1050..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200" x-data="{ files: [] }">
                     <h2 class="text-lg font-bold mb-4 text-gray-700">Bộ sưu tập ảnh (Screenshots)</h2>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative hover:bg-gray-50 transition">
@@ -56,6 +74,7 @@
                     </div>
                 </div>
             </div>
+
 
             <div class="space-y-4">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200" x-data="{ imageUrl: null }">

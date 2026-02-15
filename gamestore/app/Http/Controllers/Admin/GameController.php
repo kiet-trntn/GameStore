@@ -41,8 +41,10 @@ class GameController extends Controller
         $request->validate([
             'title'        => 'required|unique:games,title|max:255',
             'price'        => 'required|numeric|min:0',
+            'sale_price'   => 'nullable|numeric|lt:price',
+            'developer'    => 'nullable|string|max:255',
             'category_id'  => 'required|exists:categories,id',
-            'image'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Max 2MB
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg|max:5048', // Max 2MB
             'trailer_link' => 'nullable|url',
         ], [
             // 2. Thông báo lỗi tiếng Việt
@@ -63,21 +65,38 @@ class GameController extends Controller
         // 3. Nếu vượt qua kiểm tra, tiến hành lưu dữ liệu
         $game = new \App\Models\Game();
         $game->title = $request->title;
-        $game->slug = \Illuminate\Support\Str::slug($request->title);
+        $slug = \Illuminate\Support\Str::slug($request->title);
+        $game->slug = $slug;
         $game->price = $request->price;
         $game->category_id = $request->category_id;
         $game->description = $request->description;
         $game->trailer_link = $request->trailer_link;
+        $game->sale_price = $request->sale_price;
+        $game->developer = $request->developer;
+        $game->requirements = $request->requirements;
         $game->is_active = 1;
 
+        // 1. Xử lý Ảnh chính (Thumbnail) - Lưu vào thư mục riêng của game đó
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            // Tên file: thumbnail-171567.jpg
+            $fileName = 'thumbnail-' . time() . '.' . $file->getClientOriginalExtension();
+            // Lưu vào: public/games/ten-game/thumbnail-xxx.jpg
+            $path = $file->storeAs("games/$slug", $fileName, 'public');
+            $game->image = $path;
+        }
+
+        // 2. Xử lý Bộ sưu tập ảnh (Screenshots) - Lưu có thứ tự 1, 2, 3...
         if ($request->hasFile('screenshots')) {
             $imagePaths = [];
-            foreach ($request->file('screenshots') as $file) {
-                // Lưu từng ảnh vào thư mục games/screenshots
-                $path = $file->store('games/screenshots', 'public');
+            foreach ($request->file('screenshots') as $index => $file) {
+                // Tên file theo thứ tự: screenshot-1.jpg, screenshot-2.jpg...
+                $fileName = 'screenshot-' . ($index + 1) . '-' . time() . '.' . $file->getClientOriginalExtension();
+                // Lưu vào: public/games/ten-game/screenshots/screenshot-1.jpg
+                $path = $file->storeAs("games/$slug/screenshots", $fileName, 'public');
                 $imagePaths[] = $path;
             }
-            $game->screenshots = $imagePaths; // Gán mảng đường dẫn vào model
+            $game->screenshots = $imagePaths;
         }
 
         $game->save();
