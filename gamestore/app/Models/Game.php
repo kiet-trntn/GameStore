@@ -12,7 +12,11 @@ class Game extends Model
 
     protected $fillable = [
         'title', 'slug', 'description', 'price', 
-        'sale_price', 'image', 'trailer_link', 'category_id', 'is_active'
+        'sale_price', 'image', 'screenshots' , 'trailer_link', 'category_id', 'is_active'
+    ];
+
+    protected $casts = [
+        'screenshots' => 'array', // Tự động convert JSON <-> Array
     ];
 
     // Quan hệ: Một Game thuộc về một Danh mục

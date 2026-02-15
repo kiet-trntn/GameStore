@@ -70,9 +70,14 @@ class GameController extends Controller
         $game->trailer_link = $request->trailer_link;
         $game->is_active = 1;
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('games', 'public');
-            $game->image = $path;
+        if ($request->hasFile('screenshots')) {
+            $imagePaths = [];
+            foreach ($request->file('screenshots') as $file) {
+                // Lưu từng ảnh vào thư mục games/screenshots
+                $path = $file->store('games/screenshots', 'public');
+                $imagePaths[] = $path;
+            }
+            $game->screenshots = $imagePaths; // Gán mảng đường dẫn vào model
         }
 
         $game->save();
