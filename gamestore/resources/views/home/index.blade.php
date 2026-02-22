@@ -4,7 +4,7 @@
 
 @section('content')
 
-    <!-- Khám phá danh mục -->
+    <!-- SlideShow -->
     <section class="pt-28 pb-8">
         <div class="container mx-auto px-4 md:px-10">
             <div class="swiper mainHeroSwiper rounded-[2rem] overflow-hidden shadow-2xl relative border border-white/5">
@@ -65,11 +65,14 @@
         </div>
     </section>
 
-    <!-- SlideShow -->
+    
+    <!-- Khám phá danh mục -->
     <section class="container mx-auto px-4 md:px-10 py-12">
         <div class="flex items-center justify-between mb-10">
             <div>
-                <h2 class="text-3xl font-extrabold tracking-tight text-white uppercase italic">Khám phá <span class="text-blue-500 underline decoration-2 underline-offset-8">Danh mục</span></h2>
+                <h2 class="text-3xl font-extrabold tracking-tight text-white uppercase italic">
+                    Khám phá <span class="text-blue-500 underline decoration-2 underline-offset-8">Danh mục</span>
+                </h2>
                 <p class="text-gray-500 text-sm mt-2">Tìm kiếm phong cách chơi game riêng của bạn</p>
             </div>
             <div class="hidden md:flex gap-2">
@@ -78,42 +81,51 @@
             </div>
         </div>
     
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        @php
+            $gridClasses = [
+                0 => 'col-span-2 md:col-span-2 lg:col-span-2', // Ô to đầu tiên
+                1 => 'col-span-1',                             // Ô nhỏ 1
+                2 => 'col-span-1',                             // Ô nhỏ 2
+                3 => 'col-span-2'                              // Ô to cuối cùng
+            ];
             
-            <a href="#" class="col-span-2 md:col-span-2 lg:col-span-2 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
-                <img src="https://images.unsplash.com/photo-1552824730-10360ec57a1b?auto=format&fit=crop&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Action">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                <div class="absolute inset-x-0 bottom-0 p-6">
-                    <h3 class="text-xl font-bold text-white tracking-wide">Hành Động</h3>
-                    <p class="text-blue-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest mt-1">120+ Trò chơi →</p>
-                </div>
-            </a>
+            $bgImages = [
+                0 => 'https://images.unsplash.com/photo-1552824730-10360ec57a1b?auto=format&fit=crop&w=800',
+                1 => 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400',
+                2 => 'https://images.unsplash.com/photo-1580234811497-9bd7fd0f5ee6?auto=format&fit=crop&w=400',
+                3 => 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800',
+            ];
+        @endphp
     
-            <a href="#" class="col-span-1 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
-                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="RPG">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                <div class="absolute inset-x-0 bottom-0 p-6">
-                    <h3 class="text-lg font-bold text-white">Nhập Vai</h3>
-                </div>
-            </a>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            @forelse($categories as $index => $category)
+                @php
+                    // Dùng % 4 để nếu có hơn 4 danh mục thì nó sẽ lặp lại chu kỳ to nhỏ
+                    $class = $gridClasses[$index % 4];
+                    $image = $bgImages[$index % 4];
+                @endphp
     
-            <a href="#" class="col-span-1 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
-                <img src="https://images.unsplash.com/photo-1580234811497-9bd7fd0f5ee6?auto=format&fit=crop&w=400" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Indie">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                <div class="absolute inset-x-0 bottom-0 p-6">
-                    <h3 class="text-lg font-bold text-white">Indie</h3>
-                </div>
-            </a>
-    
-            <a href="#" class="col-span-2 group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
-                <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?auto=format&fit=crop&w=800" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Sports">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-                <div class="absolute inset-x-0 bottom-0 p-6 text-right">
-                    <h3 class="text-xl font-bold text-white uppercase italic tracking-tighter">Thể Thao</h3>
-                    <p class="text-gray-400 text-[10px] mt-1 uppercase tracking-[0.2em]">Cảm giác mạnh</p>
-                </div>
-            </a>
-    
+                <a href="{{ route('game', ['category' => $category->slug]) }}" class="{{ $class }} group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
+                    <img src="{{ $image }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $category->name }}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    
+                    <div class="absolute inset-x-0 bottom-0 p-6 {{ $index == 3 ? 'text-right' : '' }}">
+                        <h3 class="text-xl font-bold text-white tracking-wide {{ $index == 3 ? 'uppercase italic tracking-tighter' : '' }}">
+                            {{ $category->name }}
+                        </h3>
+                        
+                        @if($index == 3)
+                            <p class="text-gray-400 text-[10px] mt-1 uppercase tracking-[0.2em]">Cảm giác mạnh</p>
+                        @else
+                            <p class="text-blue-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest mt-1">
+                                {{ $category->games_count }} Trò chơi →
+                            </p>
+                        @endif
+                    </div>
+                </a>
+            @empty
+                <p class="text-white col-span-full text-center py-10">Chưa có danh mục nào được hiển thị.</p>
+            @endforelse
         </div>
     </section>
 

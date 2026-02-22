@@ -13,9 +13,9 @@
         <aside class="w-64 bg-indigo-900 text-white hidden md:flex flex-col">
             <div class="p-6 text-2xl font-bold border-b border-indigo-800">🚀 AdminPro</div>
             <nav class="flex-grow p-4 space-y-2">
-                <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded hover:bg-indigo-800 transition">Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/dashboard*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">Dashboard</a>
                 <a href="{{ route('admin.categories.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/categories*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">Danh mục Game</a>
-                <a href="#" class="block py-2.5 px-4 rounded hover:bg-indigo-800 transition">Sản phẩm (Games)</a>
+                <a href="{{ route('admin.games.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/games*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">Sản phẩm (Games)</a>
                 <a href="#" class="block py-2.5 px-4 rounded hover:bg-indigo-800 transition">Đơn hàng</a>
             </nav>
         </aside>

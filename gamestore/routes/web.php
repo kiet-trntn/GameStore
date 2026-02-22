@@ -14,11 +14,19 @@ Route::get('/kham-pha', [GameController::class, 'index'])->name('game');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // CATEGORIES
     Route::get('/categories/trash', [CategoryController::class, 'trash'])->name('categories.trash');
     Route::get('/categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
     Route::delete('/categories/{id}/force-delete', [CategoryController::class, 'forceDelete'])->name('categories.force_delete');
-    // Route xử lý việc bật tắt (Sử dụng method PATCH vì đây là cập nhật 1 phần)
-    Route::patch('/categories/{id}/toggle-status', [\App\Http\Controllers\Admin\CategoryController::class, 'toggleStatus'])->name('categories.toggle');
+    Route::patch('/categories/{id}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('categories.toggle');
     Route::resource('categories', CategoryController::class);
+
+    // GAMES (Đưa trash lên đầu)
+    Route::patch('games/{id}/toggle-status', [AdminGameController::class, 'toggleStatus'])->name('games.toggle');
+    Route::get('games/trash', [AdminGameController::class, 'trash'])->name('games.trash');
+    Route::get('games/{id}/restore', [AdminGameController::class, 'restore'])->name('games.restore');
+    Route::delete('games/{id}/force-delete', [AdminGameController::class, 'forceDelete'])->name('games.force_delete');
+    
+    // Resource phải nằm cuối cùng trong nhóm games
     Route::resource('games', AdminGameController::class);
 });
