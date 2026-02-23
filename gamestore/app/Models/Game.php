@@ -13,7 +13,8 @@ class Game extends Model
     protected $fillable = [
         'title', 'slug', 'description', 'price', 
         'sale_price', 'developer', 'requirements',
-        'image', 'screenshots', 'trailer_link', 'category_id', 'is_active'
+        'image', 'screenshots', 'trailer_link', 'category_id', 'is_active',
+        'is_featured', 'views',
     ];
 
     protected $casts = [

@@ -17,11 +17,12 @@ class HomeController extends Controller
                                           ->take(4)
                                           ->get();
 
-        // 2. Lấy danh sách Game Hot (Tạm lấy 8 game mới nhất đang active)
-        $hotGames= Game::where('is_active', 1)
-                         ->latest() // Mới nhất
-                         ->take(5) // Lấy 8 game 
-                         ->get();
+    // 2. Lấy danh sách Game Hot (Chỉ lấy 5 game được đánh sao)
+    $hotGames = \App\Models\Game::where('is_active', 1)
+                                ->where('is_featured', 1)
+                                ->latest()
+                                ->take(5) 
+                                ->get();
 
         // 3. Highlight: Game Mới (Lấy 3 game mới nhất)
         $newGames = Game::where('is_active', 1)

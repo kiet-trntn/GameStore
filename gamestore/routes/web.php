@@ -23,6 +23,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // GAMES (Đưa trash lên đầu)
     Route::patch('games/{id}/toggle-status', [AdminGameController::class, 'toggleStatus'])->name('games.toggle');
+    Route::patch('games/{id}/toggle-featured', [AdminGameController::class, 'toggleFeatured'])->name('games.toggle_featured');
     Route::get('games/trash', [AdminGameController::class, 'trash'])->name('games.trash');
     Route::get('games/{id}/restore', [AdminGameController::class, 'restore'])->name('games.restore');
     Route::delete('games/{id}/force-delete', [AdminGameController::class, 'forceDelete'])->name('games.force_delete');

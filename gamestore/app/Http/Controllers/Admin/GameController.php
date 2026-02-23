@@ -264,4 +264,24 @@ class GameController extends Controller
             'new_state' => $game->is_active
         ]);
     }
+
+    // Bật/tắt Game Hot (Nổi bật)
+    public function toggleFeatured($id)
+    {
+        $game = \App\Models\Game::find($id);
+
+        if (!$game) {
+            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy sản phẩm game!'], 404);
+        }
+
+        // Đảo ngược trạng thái Hot
+        $game->is_featured = !$game->is_featured;
+        $game->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $game->is_featured ? 'Đã thêm vào danh sách Game Hot!' : 'Đã gỡ khỏi danh sách Game Hot!',
+            'new_state' => $game->is_featured
+        ]);
+    }
 }

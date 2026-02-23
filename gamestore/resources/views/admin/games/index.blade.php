@@ -68,6 +68,7 @@
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Thông tin Game</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Danh mục</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Trạng thái</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Hot</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right tracking-wider">Giá bán</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Thao tác</th>
                 </tr>
@@ -133,6 +134,37 @@
                             >
                                 <span :class="active ? 'translate-x-5' : 'translate-x-1'"
                                       class="inline-block h-3.5 w-3.5 transform rounded-full bg-white transition duration-200 shadow-sm"></span>
+                            </button>
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center" x-data="{ featured: {{ $game->is_featured ? 'true' : 'false' }} }">
+                            <button 
+                                @click="fetch('{{ route('admin.games.toggle_featured', $game->id) }}', {
+                                    method: 'PATCH',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                .then(res => res.json())
+                                .then(data => { 
+                                    if(data.status === 'success') {
+                                        featured = data.new_state;
+                                        const Toast = Swal.mixin({
+                                            toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true
+                                        });
+                                        Toast.fire({ icon: 'success', title: data.message });
+                                    } else {
+                                        Swal.fire('Lỗi!', data.message, 'error');
+                                    }
+                                })"
+                                :class="featured ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-300 hover:text-gray-400'"
+                                class="transition-colors duration-300 focus:outline-none text-xl"
+                                title="Đánh dấu Game Hot"
+                            >
+                                <i class="fas fa-star" :class="featured ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]' : ''"></i>
                             </button>
                         </div>
                     </td>
