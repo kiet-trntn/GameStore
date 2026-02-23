@@ -43,18 +43,6 @@
                         <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Đang ẩn</option>
                     </select>
                 </div>
-
-                {{-- <div class="flex gap-2">
-                    <button type="submit" class="bg-gray-800 text-white px-6 py-2.5 rounded-xl hover:bg-gray-900 transition-all font-bold text-sm">
-                        Lọc
-                    </button>
-                    
-                    @if(request('keyword') || request('status'))
-                        <a href="{{ route('admin.categories.index') }}" class="bg-gray-100 text-gray-500 px-4 py-2.5 rounded-xl hover:bg-gray-200 transition-all text-sm flex items-center justify-center font-medium">
-                            Xóa lọc
-                        </a>
-                    @endif
-                </div> --}}
             </div>
         </form>
     </div>
@@ -65,6 +53,8 @@
             <thead class="bg-gray-50/50 border-b border-gray-100">
                 <tr>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase w-16 text-center tracking-wider">STT</th>
+                    {{-- Thêm cột Ảnh --}}
+                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase w-24 text-center tracking-wider">Ảnh</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Thông tin Danh mục</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Đường dẫn (Slug)</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Trạng thái</th>
@@ -76,6 +66,19 @@
                 <tr class="hover:bg-gray-50/50 transition-all duration-200">
                     <td class="px-6 py-4 text-sm text-gray-400 text-center font-medium">
                         {{ $categories->firstItem() + $loop->index }}
+                    </td>
+
+                    {{-- Hiển thị Ảnh --}}
+                    <td class="px-6 py-4">
+                        <div class="flex justify-center">
+                            <div class="w-16 h-10 rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center">
+                                @if($category->image)
+                                    <img src="{{ asset('storage/' . $category->image) }}" class="w-full h-full object-cover">
+                                @else
+                                    <span class="text-[10px] text-gray-300 font-medium">No Pic</span>
+                                @endif
+                            </div>
+                        </div>
                     </td>
 
                     <td class="px-6 py-4">
@@ -140,7 +143,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-20 text-center">
+                    {{-- Tăng colspan lên 6 vì đã có thêm cột Ảnh --}}
+                    <td colspan="6" class="px-6 py-20 text-center">
                         <div class="flex flex-col items-center">
                             <i class="fas fa-folder-open text-gray-100 text-6xl mb-4"></i>
                             <p class="text-gray-400 font-medium">Chưa có danh mục nào được tạo...</p>
@@ -171,8 +175,10 @@
                 </button>
             </div>
 
-            <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
+                
+                {{-- Tên danh mục --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Tên danh mục</label>
                     <input type="text" name="name" placeholder="Ví dụ: Hành động, Phiêu lưu..." 
@@ -180,12 +186,39 @@
                     @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
                 
+                {{-- Slug tự động --}}
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Đường dẫn (Tự động)</label>
                     <input type="text" name="slug" placeholder="slug-tu-dong" 
                            class="w-full border border-gray-100 bg-gray-100/50 rounded-xl px-4 py-3 text-gray-400 cursor-not-allowed italic" readonly>
                 </div>
 
+                {{-- Khối Chọn Ảnh (Có Preview) --}}
+                <div x-data="{ imageUrl: null }">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Ảnh đại diện (Tùy chọn)</label>
+                    <div class="flex items-center gap-4 p-3 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                        <div class="w-16 h-16 shrink-0 rounded-lg border border-gray-200 bg-white flex items-center justify-center overflow-hidden relative shadow-sm">
+                            <template x-if="imageUrl">
+                                <img :src="imageUrl" class="w-full h-full object-cover">
+                            </template>
+                            <template x-if="!imageUrl">
+                                <i class="fas fa-image text-gray-300 text-xl"></i>
+                            </template>
+                        </div>
+                        
+                        <div class="flex-grow">
+                            <input type="file" name="image" id="categoryImage" class="hidden" 
+                                @change="const file = $event.target.files[0]; if(file) imageUrl = URL.createObjectURL(file)">
+                            <label for="categoryImage" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg font-semibold cursor-pointer hover:bg-indigo-100 transition-all text-sm w-full justify-center">
+                                <i class="fas fa-cloud-upload-alt"></i> Tải ảnh lên
+                            </label>
+                            <p class="text-[10px] text-gray-400 mt-1.5 text-center italic">* Dùng ảnh ngang, tối đa 2MB</p>
+                        </div>
+                    </div>
+                    @error('image') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Nút Xác nhận --}}
                 <div class="pt-4 flex gap-3">
                     <button type="submit" class="flex-1 bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
                         Xác nhận thêm

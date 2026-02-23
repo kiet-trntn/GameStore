@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str; 
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -38,28 +39,51 @@ class CategoryController extends Controller
     }
 
     // 2. Lưu danh mục mới
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $request->validate([
-            'name' => 'required|unique:categories,name|max:50',
+            'name' => 'required|unique:categories,name|max:255',
+            // Thêm validate ảnh: Phải là ảnh, tối đa 2MB
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
-            'name.required' => 'Bạn quên nhập tên danh mục rồi!',
-            'name.unique' => 'Tên danh mục này đã tồn tại.',
+            'name.required' => 'Vui lòng nhập tên danh mục.',
+            'name.unique' => 'Tên danh mục đã tồn tại.',
+            'image.image' => 'File tải lên phải là hình ảnh.',
+            'image.max' => 'Ảnh tối đa 2MB.',
         ]);
-
-        Category::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-        ]);
-
-        return redirect()->route('admin.categories.index')->with('success', 'Đã thêm danh mục mới thành công!');
+    
+        $category = new Category();
+        $category->name = $request->name;
+        // Tạo slug nếu không nhập
+        $slug = $request->slug ? Str::slug($request->slug) : Str::slug($request->name);
+        $category->slug = $slug;
+        $category->is_active = 1; // Mặc định hiện
+    
+        // --- XỬ LÝ ẢNH ---
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            // Tạo tên file theo slug để dễ quản lý: the-thao-123456.jpg
+            $filename = $slug . '-' . time() . '.' . $file->getClientOriginalExtension();
+            // Lưu vào thư mục public/categories
+            $path = $file->storeAs('categories', $filename, 'public');
+            $category->image = $path;
+        }
+        // ----------------
+    
+        $category->save();
+    
+        return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công!');
     }
 
     // 3. Xóa mềm danh mục (vào thùng rác)
-    public function destroy($id) {
+    public function destroy(string $id)
+    {
         $category = Category::findOrFail($id);
-        $category->delete();
-
-        return redirect()->back()->with('success', 'Đã xóa danh mục thành công!');
+    
+        // CHỈ XÓA MỀM - BỎ ĐOẠN XÓA ẢNH Ở ĐÂY
+        $category->delete(); 
+    
+        return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển danh mục vào thùng rác!');
     }
 
     // 4. Hiển thị form sửa
@@ -69,19 +93,42 @@ class CategoryController extends Controller
     }
 
     // 5. Cập nhật dữ liệu
-    public function update(Request $request, $id) {
+    public function update(Request $request, string $id)
+    {
         $category = Category::findOrFail($id);
-
+    
         $request->validate([
-            'name' => 'required|max:50|unique:categories,name,'. $id,
+            'name' => 'required|max:255|unique:categories,name,' . $id,
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+    
+        $category->name = $request->name;
+        // Cập nhật slug mới nếu tên thay đổi (tuỳ chọn)
+        $newSlug = Str::slug($request->name);
+        $category->slug = $newSlug;
+    
+        // --- XỬ LÝ ẢNH KHI UPDATE ---
+        // --- XỬ LÝ ẢNH KHI UPDATE ---
+        if ($request->hasFile('image')) {
+            // 1. Lấy đường dẫn gốc của ảnh cũ (tránh lỗi nếu Model có Accessor)
+            $oldImagePath = $category->getRawOriginal('image');
+            
+            // Nếu có ảnh cũ thì thực hiện xóa thẳng luôn
+            if (!empty($oldImagePath)) {
+                Storage::disk('public')->delete($oldImagePath);
+            }
 
-        $category->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name)
-        ]);
-
-        return redirect()->route('admin.categories.index')->with('success', 'Đã cập nhật danh mục thành công!');
+            // 2. Lưu ảnh mới
+            $file = $request->file('image');
+            $filename = $newSlug . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('categories', $filename, 'public');
+            $category->image = $path;
+        }
+        // ---------------------------
+    
+        $category->save();
+    
+        return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công!');
     }
 
     // 6. Thùng rác
@@ -107,6 +154,12 @@ class CategoryController extends Controller
         $category = Category::withTrashed()->find($id);
         
         if ($category) {
+            // Lấy đường dẫn gốc và xóa file vật lý
+            $imagePath = $category->getRawOriginal('image');
+            if (!empty($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
             $category->forceDelete(); 
             return redirect()->back()->with('success', 'Đã xóa vĩnh viễn danh mục!');
         }

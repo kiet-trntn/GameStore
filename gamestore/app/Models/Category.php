@@ -10,7 +10,13 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'slug', 'is_active'];
+    protected $fillable = 
+    [
+        'name', 
+        'slug', 
+        'is_active', 
+        'image'
+    ];
 
     protected $casts = [
         'is_active' => 'boolean',
