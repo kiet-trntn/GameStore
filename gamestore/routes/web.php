@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\GameController as AdminGameController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/kham-pha', [GameController::class, 'index'])->name('game');
+Route::get('/kham-pha', [UserGameController::class, 'index'])->name('game');
+Route::get('/game/{slug}', [UserGameController::class, 'show'])->name('game.detail');
+
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

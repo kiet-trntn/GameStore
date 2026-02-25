@@ -17,12 +17,12 @@ class HomeController extends Controller
                                           ->take(4)
                                           ->get();
 
-    // 2. Lấy danh sách Game Hot (Chỉ lấy 5 game được đánh sao)
-    $hotGames = \App\Models\Game::where('is_active', 1)
-                                ->where('is_featured', 1)
-                                ->latest()
-                                ->take(5) 
-                                ->get();
+        // 2. Lấy danh sách Game Hot (Chỉ lấy 5 game được đánh sao)
+        $hotGames = \App\Models\Game::where('is_active', 1)
+                                    ->where('is_featured', 1)
+                                    ->latest()
+                                    ->take(5) 
+                                    ->get();
 
         // 3. Highlight: Game Mới (Lấy 3 game mới nhất)
         $newGames = Game::where('is_active', 1)
@@ -30,11 +30,11 @@ class HomeController extends Controller
                          ->take(3)
                          ->get();
         
-        // 4. Highlight: Game Phổ Biến (Tạm thời lấy ngẫu nhiên 3 game để không trùng)
-        $popularGames = Game::where('is_active', 1)
-                         ->inRandomOrder()
-                         ->take(3)
-                         ->get();
+        // 4. Highlight: Game Phổ Biến (Lấy 3 game có lượt xem cao nhất)
+        $popularGames = \App\Models\Game::where('is_active', 1)
+                                    ->orderBy('views', 'desc') // Xếp theo lượt xem giảm dần
+                                    ->take(3)
+                                    ->get();
         
         // 5. Highlight: Sắp Ra Mắt (Tạm thời lấy 3 game xếp theo tên. Sau này ba thêm cột release_date thì mình đổi lại)
         $upcomingGames = Game::where('is_active', 1)

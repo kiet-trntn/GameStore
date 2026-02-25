@@ -69,6 +69,7 @@
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Danh mục</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Trạng thái</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Hot</th>
+                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Lượt xem</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right tracking-wider">Giá bán</th>
                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center tracking-wider">Thao tác</th>
                 </tr>
@@ -166,6 +167,13 @@
                             >
                                 <i class="fas fa-star" :class="featured ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]' : ''"></i>
                             </button>
+                        </div>
+                    </td>
+
+                    <td class="px-6 py-4 text-center">
+                        <div class="inline-flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm" title="Tổng số lượt xem">
+                            <i class="fas fa-eye text-blue-500 text-xs"></i>
+                            <span class="text-sm font-bold text-gray-700">{{ number_format($game->views) }}</span>
                         </div>
                     </td>
 

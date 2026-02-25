@@ -160,7 +160,7 @@
                 {{-- Đổ 5 game hot từ biến $hotGames --}}
                 @forelse($hotGames as $index => $game)
                     <div class="swiper-slide group">
-                        <a href="#" class="block relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
+                        <a href="{{ route('game.detail', $game->slug) }}" class="block relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
                             
                             {{-- Ảnh đại diện Game --}}
                             @if($game->image)
