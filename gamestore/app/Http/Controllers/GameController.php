@@ -55,14 +55,16 @@ class GameController extends Controller
         // Lấy dữ liệu, phân trang mỗi trang 9 game (appends để giữ lại url khi chuyển trang)
         $games = $query->latest()->paginate(9)->appends($request->all());
 
+        // Lấy toàn bộ danh mục đang hoạt động để in ra Sidebar
+        $categories = \App\Models\Category::where('is_active', 1)->get();
+
         // NẾU LÀ YÊU CẦU AJAX (TỪ JAVASCRIPT)
         if ($request->ajax()) {
             // Chỉ trả về đoạn HTML chứa danh sách game
-            return view('game.partials.game_grid', compact('games'))->render();
+            return view('game.partials.game_grid', compact('games', 'categories'))->render();
         }
 
-        // Lấy toàn bộ danh mục đang hoạt động để in ra Sidebar
-        $categories = \App\Models\Category::where('is_active', 1)->get();
+
 
         // Lấy Top 4 game Bán chạy (Tạm tính bằng Lượt xem - Views)
         // Chỉ lấy những game đã ra mắt

@@ -6,11 +6,13 @@ use App\Http\Controllers\GameController as UserGameController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
+use App\Http\Controllers\CartController;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/kham-pha', [UserGameController::class, 'index'])->name('game');
 Route::get('/game/{slug}', [UserGameController::class, 'show'])->name('game.detail');
+Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
