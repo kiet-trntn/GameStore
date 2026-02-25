@@ -63,6 +63,7 @@ class GameController extends Controller
             'category_id'  => 'required|exists:categories,id',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg|max:5048', // Max 2MB
             'trailer_link' => 'nullable|url',
+            'release_date' => 'nullable|date',
         ], [
             // 2. Thông báo lỗi tiếng Việt
             'title.required'     => 'Trường tên game là bắt buộc.',
@@ -91,6 +92,7 @@ class GameController extends Controller
         $game->sale_price = $request->sale_price;
         $game->developer = $request->developer;
         $game->requirements = $request->requirements;
+        $game->release_date = $request->release_date;
         $game->is_active = 1;
 
         // 1. Xử lý Ảnh chính (Thumbnail) - Lưu vào thư mục riêng của game đó

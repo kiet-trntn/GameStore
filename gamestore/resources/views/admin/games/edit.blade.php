@@ -67,6 +67,11 @@
                             <input type="text" name="developer" value="{{ old('developer', $game->developer) }}" 
                                 class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition">
                         </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Ngày ra mắt (Dự kiến)</label>
+                            <input type="date" name="release_date" value="{{ old('release_date', $game->release_date ?? '') }}" 
+                                   class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1 text-green-600">Giá khuyến mãi</label>
                             <input type="number" name="sale_price" value="{{ old('sale_price', $game->sale_price) }}" 

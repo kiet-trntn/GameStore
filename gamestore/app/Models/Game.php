@@ -14,11 +14,12 @@ class Game extends Model
         'title', 'slug', 'description', 'price', 
         'sale_price', 'developer', 'requirements',
         'image', 'screenshots', 'trailer_link', 'category_id', 'is_active',
-        'is_featured', 'views',
+        'is_featured', 'views', 'release_date',
     ];
 
     protected $casts = [
         'screenshots' => 'array', // Tự động convert JSON <-> Array
+        'release_date' => 'date',
     ];
 
     // Quan hệ: Một Game thuộc về một Danh mục

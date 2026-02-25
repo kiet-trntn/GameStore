@@ -94,8 +94,23 @@
                     </td>
 
                     <td class="px-6 py-4">
-                        <div class="text-sm font-bold text-gray-800">{{ $game->title }}</div>
-                        <div class="text-[10px] text-gray-400 uppercase tracking-tighter">{{ $game->developer ?? 'N/A' }}</div>
+                        <div class="flex items-center gap-2">
+                            <div class="text-sm font-bold text-gray-800">{{ $game->title }}</div>
+                            
+                            {{-- Kiểm tra nếu có ngày ra mắt và ngày đó LỚN HƠN hiện tại -> Hiện badge Sắp ra mắt --}}
+                            @if($game->release_date && $game->release_date > now())
+                                <span class="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-200 text-[9px] font-black uppercase tracking-widest rounded-md whitespace-nowrap">
+                                    Sắp ra mắt
+                                </span>
+                            @endif
+                        </div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-tighter mt-1">
+                            {{ $game->developer ?? 'N/A' }} 
+                            {{-- In luôn ngày ra mắt cho Admin dễ theo dõi --}}
+                            @if($game->release_date)
+                                | <i class="far fa-calendar-alt"></i> {{ $game->release_date->format('d/m/Y') }}
+                            @endif
+                        </div>
                     </td>
 
                     <td class="px-6 py-4">

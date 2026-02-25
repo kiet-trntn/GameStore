@@ -289,7 +289,7 @@
                 
                 <div class="flex flex-col gap-2">
                     @forelse($newGames as $game)
-                        <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
                             <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150' }}" 
                                  class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
@@ -316,7 +316,7 @@
                 
                 <div class="flex flex-col gap-2">
                     @forelse($popularGames as $game)
-                        <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
                             <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150' }}" 
                                  class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
@@ -343,13 +343,16 @@
                 
                 <div class="flex flex-col gap-2">
                     @forelse($upcomingGames as $game)
-                        <a href="#" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
+                        <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
                             <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150' }}" 
                                  class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">{{ $game->title }}</h4>
                                 {{-- Vì là sắp ra mắt nên tui để chữ Coming Soon màu đỏ cho ngầu, sau này ba làm cột release_date thì mình in ngày ra --}}
-                                <span class="text-xs text-red-400 font-bold tracking-widest">COMING SOON</span>
+                                {{-- In ngày ra mắt thật từ Database (định dạng Ngày/Tháng/Năm) --}}
+                                <span class="text-xs text-red-400 font-bold tracking-widest uppercase">
+                                    {{ $game->release_date->format('d/m/Y') }}
+                                </span>
                             </div>
                         </a>
                     @empty
