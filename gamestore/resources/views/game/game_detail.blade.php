@@ -60,7 +60,7 @@
                 
                 <div class="flex flex-col sm:flex-row gap-4">
                     <button class="flex-grow bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-widest py-5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:-translate-y-1">Mua Ngay</button>
-                    <button class="glass px-8 py-5 rounded-2xl hover:bg-white/10 transition-all border border-white/10 text-white">
+                    <button class="btn-add-cart glass px-8 py-5 rounded-2xl hover:bg-white/10 transition-all border border-white/10 text-white" data-id="{{ $game->id }}">
                         <i class="fas fa-cart-plus text-xl"></i>
                     </button>
                 </div>
@@ -145,4 +145,93 @@
     @endif
 </main>
 
+
+
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll('.btn-add-cart').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            
+            let gameId = this.getAttribute('data-id');
+            let url = `/gio-hang/them/${gameId}`;
+            let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Đổi giao diện nút thành loading
+            let originalContent = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i>';
+            this.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(async response => {
+                // MÁY QUÉT LỖI: Bắt quả tang Server quăng lỗi 500
+                if (!response.ok && response.status !== 401) {
+                    let errorText = await response.text();
+                    console.error("LỖI TỪ SERVER:", errorText);
+                    throw new Error("Lỗi Server: Vui lòng check tab Console (F12)!");
+                }
+
+                if (response.status === 401) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ối chà!',
+                        text: 'Ba phải đăng nhập mới mua game được nha!',
+                        confirmButtonText: 'Đăng nhập ngay',
+                        confirmButtonColor: '#2563EB'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/login';
+                        }
+                    });
+                    throw new Error('Chưa đăng nhập');
+                }
+                return response.json();
+            })
+            .then(data => {
+                this.innerHTML = originalContent;
+                this.disabled = false;
+
+                if (data.status === 'success') {
+                    let badge = document.getElementById('cart-count-badge');
+                    if (badge) {
+                        badge.innerText = data.cart_count;
+                        badge.classList.remove('hidden');
+                    }
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã bỏ vô giỏ!',
+                        text: data.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else if (data.status === 'warning') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Khoan đã!',
+                        text: data.message,
+                        confirmButtonColor: '#F59E0B'
+                    });
+                }
+            })
+            .catch(error => {
+                // NẾU CÓ LỖI NÓ SẼ BÁO LÊN ĐÂY
+                this.innerHTML = originalContent;
+                this.disabled = false;
+                if(error.message !== 'Chưa đăng nhập') {
+                    Swal.fire('Lỗi Code Rồi Ba Ơi!', 'Bấm F12 qua tab Console xem nó báo gì nha!', 'error');
+                }
+            });
+        });
+    });
+</script>
 @endsection

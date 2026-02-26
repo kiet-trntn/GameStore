@@ -7,12 +7,24 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AuthController;
+
+// Nhóm Route cho Đăng nhập / Đăng ký
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route cho Đăng ký
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/kham-pha', [UserGameController::class, 'index'])->name('game');
 Route::get('/game/{slug}', [UserGameController::class, 'show'])->name('game.detail');
 Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
+Route::post('/gio-hang/them/{game_id}', [CartController::class, 'add'])->name('cart.add');
+// Route xóa game khỏi giỏ (Dùng DELETE cho đúng chuẩn RESTful)
+Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {

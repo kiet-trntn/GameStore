@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameX Pro | Premium Store</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
@@ -66,35 +67,86 @@
     <!-- Header -->
     <div class="fixed w-full z-[100] px-4 md:px-10 pt-6">
         <nav class="max-w-7xl mx-auto glass rounded-2xl py-3 px-6 flex justify-between items-center shadow-2xl shadow-black/50 border border-white/10">
-            <div class="text-2xl font-bold tracking-tighter flex items-center gap-2">
-                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white italic shadow-lg shadow-blue-500/20">G</div>
-                <span class="text-white hidden sm:block">GAMEX</span>
-            </div>
+            
+            {{-- 1. LOGO: Bấm vào là về Trang Chủ --}}
+            <a href="{{ route('home') }}" class="text-2xl font-bold tracking-tighter flex items-center gap-2 group">
+                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white italic shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">G</div>
+                <span class="text-white hidden sm:block group-hover:text-blue-400 transition-colors">GAMEX</span>
+            </a>
     
+            {{-- 2. MENU LINK: Tự động sáng lên khi đang ở đúng trang --}}
             <div class="hidden lg:flex items-center gap-10 text-[13px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                <a href="#" class="text-blue-500 border-b-2 border-blue-500 pb-1">Cửa hàng</a>
-                <a href="#" class="hover:text-white transition-colors duration-300">Khám phá</a>
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-blue-500 border-b-2 border-blue-500 pb-1' : 'hover:text-white transition-colors duration-300' }}">Trang chủ</a>
+                <a href="{{ route('game') }}" class="{{ request()->routeIs('game*') ? 'text-blue-500 border-b-2 border-blue-500 pb-1' : 'hover:text-white transition-colors duration-300' }}">Khám phá</a>
                 <a href="#" class="hover:text-white transition-colors duration-300">Tin tức</a>
                 <a href="#" class="hover:text-white transition-colors duration-300">Cộng đồng</a>
             </div>
     
             <div class="flex items-center gap-3">
-                <div class="relative hidden xl:block">
-                    <input type="text" placeholder="Tìm kiếm siêu phẩm..." 
-                           class="bg-white/5 border border-white/5 rounded-xl py-2.5 px-5 text-xs focus:outline-none focus:border-blue-500/50 w-64 focus:w-80 transition-all duration-500">
-                    <span class="absolute right-4 top-2.5 text-gray-500">⌘K</span>
-                </div>
+                {{-- Ô Tìm Kiếm Nhanh (Sẽ link tới trang Khám phá cùng từ khóa) --}}
+                <form action="{{ route('game') }}" method="GET" class="relative hidden xl:block">
+                    <input type="text" name="search" placeholder="Tìm kiếm siêu phẩm..." 
+                           class="bg-white/5 border border-white/5 rounded-xl py-2.5 px-5 text-xs text-white focus:outline-none focus:border-blue-500/50 w-64 focus:w-80 transition-all duration-500">
+                    <button type="submit" class="absolute right-4 top-2.5 text-gray-500 hover:text-blue-500 transition-colors"><i class="fas fa-search"></i></button>
+                </form>
                 
                 <div class="flex items-center gap-2 ml-2">
-                    <button class="p-2.5 hover:bg-white/5 rounded-xl transition-all text-gray-400 hover:text-white relative">
+                    
+                    {{-- 3. GIỎ HÀNG: Chỉ hiện số đếm khi đã đăng nhập --}}
+                    <a href="{{ route('cart.index') }}" class="p-2.5 hover:bg-white/5 rounded-xl transition-all text-gray-400 hover:text-white relative group">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full border-2 border-[#08080a]"></span>
-                    </button>
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20">
-                        Đăng nhập
-                    </button>
+                        
+                        @auth
+                            @php
+                                // Đếm số game đang có trong giỏ của user này
+                                $cartCount = \App\Models\Cart::where('user_id', Auth::id())->count();
+                            @endphp
+                            {{-- Chỗ này đặt id="cart-count-badge" để xíu nữa AJAX gọi đổi số --}}
+                            <span id="cart-count-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-blue-600 text-white text-[9px] font-black flex items-center justify-center rounded-full border-2 border-[#08080a] shadow-lg shadow-blue-500/50 {{ $cartCount == 0 ? 'hidden' : '' }}">
+                                {{ $cartCount }}
+                            </span>
+                        @else
+                            {{-- Chấm nhỏ xíu báo hiệu dành cho khách chưa đăng nhập --}}
+                            <span class="absolute top-2 right-2 w-2 h-2 bg-gray-500 rounded-full border-2 border-[#08080a]"></span>
+                        @endauth
+                    </a>
+
+                    {{-- 4. KHU VỰC TÀI KHOẢN (GUEST vs AUTH) --}}
+                    @guest
+                        {{-- Nếu CHƯA đăng nhập: Hiện nút Đăng nhập --}}
+                        <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                            Đăng nhập
+                        </a>
+                    @else
+                        {{-- Nếu ĐÃ đăng nhập: Hiện Avatar + Tên + Dropdown menu --}}
+                        <div class="relative group">
+                            <button class="flex items-center gap-2 glass px-3 py-2 rounded-xl hover:bg-white/10 transition-all border border-white/5">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=2563EB&color=fff" class="w-6 h-6 rounded-full">
+                                <span class="text-xs font-bold text-white max-w-[80px] truncate">{{ Auth::user()->name }}</span>
+                                <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                            </button>
+                            
+                            {{-- Dropdown (Sẽ xổ xuống khi hover chuột) --}}
+                            <div class="absolute right-0 mt-2 w-48 glass rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-white/10 shadow-2xl">
+                                <a href="#" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                    <i class="fas fa-user-circle w-4 text-center mr-1"></i> Hồ sơ của tôi
+                                </a>
+                                <a href="{{ route('cart.index') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                    <i class="fas fa-shopping-bag w-4 text-center mr-1"></i> Đơn hàng đã mua
+                                </a>
+                                <div class="border-t border-white/10 my-1"></div>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left px-4 py-3 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors">
+                                        <i class="fas fa-sign-out-alt w-4 text-center mr-1"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endauth
+
                 </div>
             </div>
         </nav>
@@ -104,7 +156,7 @@
         @yield('content')
     </main>
     
-    <!-- footer -->
+    <!-- footer --> 
     <footer class="container mx-auto px-4 md:px-10 pb-10 mt-20">
         <div class="glass rounded-[2.5rem] p-10 md:p-16 border border-white/10 shadow-2xl relative overflow-hidden">
             <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-600/10 blur-[100px] rounded-full"></div>
@@ -180,7 +232,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        const swiper = new Swiper('.mainHeroSwiper', {
+
+
+        
+        // Khởi tạo Swiper an toàn
+        if (document.querySelector('.mainHeroSwiper')) {
+            const swiper = new Swiper('.mainHeroSwiper', {
             loop: true,
             speed: 1000, // Tăng tốc độ chuyển cảnh cho mượt
             autoplay: { 
@@ -199,8 +256,10 @@
             effect: 'fade',
             fadeEffect: { crossFade: true }
         });
+        }
 
-        // Khởi tạo Swiper cho Game Hot
+        if (document.querySelector('.hotGamesSwiper')) {
+            // Khởi tạo Swiper cho Game Hot
         const hotSwiper = new Swiper('.hotGamesSwiper', {
             slidesPerView: 1.5, // Hiển thị 1 phần của slide tiếp theo để người dùng biết là lướt được
             spaceBetween: 20,
@@ -227,6 +286,7 @@
                 }
             }
         });
+        }
     </script>
     @yield('scripts')
 </body>

@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // Một User có nhiều Item trong Giỏ hàng
+    public function carts() {
+        return $this->hasMany(Cart::class);
+    }
 }

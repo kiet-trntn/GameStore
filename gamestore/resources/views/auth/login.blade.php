@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập | GAMEX Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #050507; 
+            color: #eee;
+        }
+        .glass {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(25px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(at 0% 0%, rgba(37,99,235,0.15), transparent 50%),
+                        radial-gradient(at 100% 100%, rgba(139,92,246,0.1), transparent 50%);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden">
+    <div class="bg-mesh"></div>
+
+    <div class="flex h-full w-full">
+        <div class="hidden lg:block lg:w-3/5 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200" 
+                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-[10000ms] hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#050507]/20 to-[#050507]"></div>
+            
+            <div class="absolute top-12 left-12 flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white italic text-2xl font-black shadow-2xl shadow-blue-600/40">G</div>
+                <span class="text-2xl font-black text-white italic tracking-tighter uppercase">GameX</span>
+            </div>
+
+            <div class="absolute bottom-16 left-12 max-w-md">
+                <p class="text-3xl font-black text-white italic uppercase tracking-tighter leading-tight mb-4">
+                    "Nơi những huyền thoại <br>được bắt đầu."
+                </p>
+                <div class="h-1 w-20 bg-blue-600 rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-2/5 flex items-center justify-center px-6 md:px-16">
+            <div class="w-full max-w-md">
+                <div class="mb-10 text-center lg:text-left">
+                    <h1 class="text-4xl font-black text-white uppercase italic tracking-tighter mb-2">Chào mừng <span class="text-blue-500">Trở lại</span></h1>
+                    <p class="text-gray-500 font-medium">Đăng nhập để tiếp tục cuộc hành trình của bạn.</p>
+                </div>
+
+                <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+                    @csrf {{-- Mã bảo mật bắt buộc của Laravel --}}
+                    
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">Email game thủ</label>
+                        <div class="relative group">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" /></svg>
+                            </span>
+                            <input type="email" name="email" value="{{ old('email') }}" placeholder="example@gamex.com" 
+                                   class="w-full bg-white/5 border {{ $errors->has('email') ? 'border-red-500' : 'border-white/10' }} rounded-2xl py-4 pl-14 pr-6 text-sm text-white focus:outline-none focus:border-blue-500 transition-all input-focus">
+                        </div>
+                        {{-- Hiển thị lỗi Email --}}
+                        @error('email')
+                            <p class="text-xs text-red-500 font-bold ml-1 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center px-1">
+                            <label class="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Mật mã</label>
+                            <a href="#" class="text-[10px] font-black text-blue-500 uppercase hover:text-white transition-colors">Quên mật khẩu?</a>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-500 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                            </span>
+                            <input type="password" name="password" placeholder="••••••••" 
+                                   class="w-full bg-white/5 border {{ $errors->has('password') ? 'border-red-500' : 'border-white/10' }} rounded-2xl py-4 pl-14 pr-6 text-sm text-white focus:outline-none focus:border-blue-500 transition-all input-focus">
+                        </div>
+                        {{-- Hiển thị lỗi Password --}}
+                        @error('password')
+                            <p class="text-xs text-red-500 font-bold ml-1 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-[0.2em] py-5 rounded-2xl shadow-lg shadow-blue-500/20 transition-all transform hover:-translate-y-1 active:scale-95">
+                        Bắt đầu chơi
+                    </button>
+                </form>
+
+                <div class="mt-10">
+                    <div class="relative flex py-5 items-center">
+                        <div class="flex-grow border-t border-white/5"></div>
+                        <span class="flex-shrink mx-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Hoặc đăng nhập bằng</span>
+                        <div class="flex-grow border-t border-white/5"></div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mt-6">
+                        <button class="glass py-3 rounded-xl flex items-center justify-center hover:bg-white/5 transition-all">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="h-5 w-5" alt="google">
+                        </button>
+                        <button class="glass py-3 rounded-xl flex items-center justify-center hover:bg-white/5 transition-all">
+                            <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" class="h-5 w-5" alt="facebook">
+                        </button>
+                        <button class="glass py-3 rounded-xl flex items-center justify-center hover:bg-white/5 transition-all">
+                            <img src="https://www.svgrepo.com/show/446820/apple.svg" class="h-5 w-5 invert" alt="apple">
+                        </button>
+                    </div>
+                </div>
+
+                <p class="mt-12 text-center text-sm text-gray-500">
+                    Chưa có tài khoản? 
+                    <a href="#" class="text-white font-bold hover:text-blue-500 transition-colors uppercase tracking-widest ml-1">Đăng ký ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
