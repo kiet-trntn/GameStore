@@ -27,4 +27,8 @@ class Game extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function reviews() {
+        return $this->hasMany(Review::class)->latest(); // Lấy review mới nhất lên đầu
+    }
 }

@@ -119,6 +119,116 @@
         </div>
     </div>
 
+    {{-- ======================================= --}}
+    {{-- KHU VỰC ĐÁNH GIÁ & BÌNH LUẬN CỦA GAME THỦ --}}
+    {{-- ======================================= --}}
+    <div class="mt-32 border-t border-white/5 pt-20" id="review-section">
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <h3 class="text-3xl md:text-4xl font-black text-white uppercase italic tracking-tighter mb-2">
+                    Đánh giá <span class="text-yellow-400">Cộng đồng</span>
+                </h3>
+                <p class="text-gray-400 font-medium text-sm">Hội anh em đồng dâm nói gì về tựa game này?</p>
+            </div>
+            <div class="hidden md:block">
+                <span class="bg-yellow-500/20 text-yellow-400 font-black px-4 py-2 rounded-xl border border-yellow-500/20">
+                    <i class="fas fa-star mr-1"></i> {{ $game->reviews->count() }} Đánh giá
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            {{-- CỘT TRÁI: FORM VIẾT ĐÁNH GIÁ --}}
+            <div class="lg:col-span-4">
+                <div class="glass p-8 rounded-[2.5rem] border-white/5 sticky top-32 shadow-2xl relative overflow-hidden">
+                    <div class="absolute -top-20 -left-20 w-40 h-40 bg-yellow-500/10 blur-[60px] rounded-full"></div>
+                    
+                    <h4 class="text-xl font-black text-white uppercase italic tracking-tight mb-6">Viết cảm nhận của ba</h4>
+
+                    @auth
+                        <form action="{{ route('review.store', $game->id) }}" method="POST">
+                            @csrf
+                            
+                            {{-- Khung chọn số sao (1-5) --}}
+                            <div class="mb-6">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Chấm điểm siêu phẩm</label>
+                                <div class="flex gap-2" id="star-rating-container">
+                                    {{-- "Má" xài thẻ SVG siêu nhẹ thay cho FontAwesome để chống lỗi tàng hình --}}
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <svg data-rating="{{ $i }}" class="star-btn w-10 h-10 text-gray-600 cursor-pointer hover:scale-110 transition-all duration-300" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    @endfor
+                                </div>
+                                {{-- Ô input tàng hình để gửi số sao lên Controller --}}
+                                <input type="hidden" name="rating" id="rating-input" value="0">
+                            </div>
+
+                            <div class="mb-8">
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bình luận</label>
+                                <textarea name="comment" rows="4" placeholder="Cốt truyện hay không ba? Đồ họa xịn không?" class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-yellow-500 transition-all resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black text-xs uppercase tracking-[0.2em] py-4 rounded-2xl shadow-lg shadow-yellow-500/20 transition-all hover:-translate-y-1">
+                                Chốt Đánh Giá
+                            </button>
+                        </form>
+                    @else
+                        {{-- Nếu chưa đăng nhập thì chặn lại không cho viết --}}
+                        <div class="text-center py-8 bg-white/5 rounded-3xl border border-white/10">
+                            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-lock text-2xl text-gray-400"></i>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-6 font-medium px-4">Đăng nhập để lại dấu ấn của ba cho siêu phẩm này nhé!</p>
+                            <a href="{{ route('login') }}" class="inline-block bg-white text-black px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-xl">
+                                Đăng nhập ngay
+                            </a>
+                        </div>
+                    @endauth
+                </div>
+            </div>
+
+            {{-- CỘT PHẢI: DANH SÁCH BÌNH LUẬN ĐÃ CÓ --}}
+            <div class="lg:col-span-8 space-y-6">
+                @if($game->reviews && $game->reviews->count() > 0)
+                    @foreach($game->reviews as $review)
+                        <div class="glass p-6 md:p-8 rounded-[2rem] border-white/5 flex gap-5 md:gap-6 hover:bg-white/[0.03] transition-colors">
+                            <div class="flex-shrink-0">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($review->user->name) }}&background=EAB308&color=000" class="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white/10 shadow-lg">
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex flex-col md:flex-row md:justify-between md:items-start mb-3 gap-2">
+                                    <div>
+                                        <h5 class="text-white font-black text-lg">{{ $review->user->name }}</h5>
+                                        <p class="text-gray-500 text-[10px] uppercase tracking-widest font-bold">{{ $review->created_at->diffForHumans() }}</p>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        {{-- In ra đúng số sao vàng dựa vào rating của khách --}}
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <svg class="w-4 h-4 md:w-5 md:h-5 {{ $i <= $review->rating ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]' : 'text-gray-700' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        @endfor
+                                    </div>
+                                </div>
+                                <p class="text-gray-300 text-sm md:text-base leading-relaxed">{{ $review->comment }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    {{-- Không có đánh giá nào --}}
+                    <div class="min-h-[30vh] flex flex-col items-center justify-center text-center glass rounded-[2.5rem] border-white/5">
+                        <i class="fas fa-comment-slash text-5xl text-gray-600 mb-6"></i>
+                        <h5 class="text-xl font-black text-white uppercase italic tracking-tighter mb-2">Chưa có đánh giá nào</h5>
+                        <p class="text-gray-500 font-medium">Siêu phẩm này vẫn đang chờ người "bóc tem". Ba thử liền đi!</p>
+                    </div>
+                @endif
+            </div>
+            
+        </div>
+    </div>
+
     {{-- PHẦN 4: GỢI Ý GAME CÙNG THỂ LOẠI --}}
     @if($relatedGames->count() > 0)
     <section>
@@ -147,4 +257,37 @@
 
 
 
+@endsection
+
+@section('scripts')
+<script>
+    // ==========================================
+    // XỬ LÝ CLICK CHỌN SỐ SAO (RATING)
+    // ==========================================
+    const stars = document.querySelectorAll('.star-btn');
+    const ratingInput = document.getElementById('rating-input');
+
+    if (stars.length > 0) {
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                // Lấy số sao vừa click
+                let ratingValue = this.getAttribute('data-rating');
+                
+                // Nạp vô thẻ input tàng hình để mốt submit form
+                ratingInput.value = ratingValue;
+                
+                // Duyệt qua 5 ngôi sao, thằng nào bé hơn hoặc bằng thì tô màu Vàng, lớn hơn thì tô Xám
+                stars.forEach(s => {
+                    if(s.getAttribute('data-rating') <= ratingValue) {
+                        s.classList.remove('text-gray-600');
+                        s.classList.add('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
+                    } else {
+                        s.classList.remove('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
+                        s.classList.add('text-gray-600');
+                    }
+                });
+            });
+        });
+    }
+</script>
 @endsection

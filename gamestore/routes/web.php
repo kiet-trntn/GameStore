@@ -10,6 +10,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReviewController;
 
 // Nhóm Route cho Đăng nhập / Đăng ký
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -38,6 +39,8 @@ Route::get('/thu-vien-game', [OrderController::class, 'library'])->name('user.li
 Route::get('/ho-so', [ProfileController::class, 'index'])->name('profile.index')->middleware('auth');
 Route::post('/ho-so/cap-nhat', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
 Route::post('/ho-so/doi-mat-khau', [ProfileController::class, 'updatePassword'])->name('profile.password')->middleware('auth');
+// ROUTE ĐÁNH GIÁ GAME
+Route::post('/game/{id}/review', [ReviewController::class, 'store'])->name('review.store')->middleware('auth');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
