@@ -130,11 +130,11 @@
                             
                             {{-- Dropdown (Sẽ xổ xuống khi hover chuột) --}}
                             <div class="absolute right-0 mt-2 w-48 glass rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-white/10 shadow-2xl">
-                                <a href="#" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                <a href="{{ route('profile.index') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                                     <i class="fas fa-user-circle w-4 text-center mr-1"></i> Hồ sơ của tôi
                                 </a>
-                                <a href="{{ route('cart.index') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
-                                    <i class="fas fa-shopping-bag w-4 text-center mr-1"></i> Đơn hàng đã mua
+                                <a href="{{ route('user.library') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white...">
+                                    <i class="fas fa-shopping-bag w-4 text-center mr-1"></i> Thư viện Game
                                 </a>
                                 <div class="border-t border-white/10 my-1"></div>
                                 <form method="POST" action="{{ route('logout') }}">

@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
 
 // Nhóm Route cho Đăng nhập / Đăng ký
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -30,6 +32,12 @@ Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('ca
 Route::post('/thanh-toan', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/thanh-toan/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
 Route::get('/thanh-toan/thanh-cong', [CartController::class, 'success'])->name('checkout.success');
+// Route dẫn tới Thư viện Game / Lịch sử đơn hàng
+Route::get('/thu-vien-game', [OrderController::class, 'library'])->name('user.library')->middleware('auth');
+// ROUTE QUẢN LÝ TÀI KHOẢN
+Route::get('/ho-so', [ProfileController::class, 'index'])->name('profile.index')->middleware('auth');
+Route::post('/ho-so/cap-nhat', [ProfileController::class, 'update'])->name('profile.update')->middleware('auth');
+Route::post('/ho-so/doi-mat-khau', [ProfileController::class, 'updatePassword'])->name('profile.password')->middleware('auth');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
