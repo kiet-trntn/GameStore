@@ -29,6 +29,7 @@ Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('ca
 // Route Thanh toán & Nhận kết quả từ VNPay
 Route::post('/thanh-toan', [CartController::class, 'checkout'])->name('cart.checkout');
 Route::get('/thanh-toan/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
+Route::get('/thanh-toan/thanh-cong', [CartController::class, 'success'])->name('checkout.success');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {

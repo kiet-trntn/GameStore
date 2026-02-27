@@ -246,7 +246,7 @@ class CartController extends Controller
             if ($request->vnp_ResponseCode == '00') {
                 $order->update(['status' => 'completed']); // Chốt đơn!
                 Cart::where('user_id', $order->user_id)->delete(); // Xóa giỏ hàng
-                return redirect()->route('cart.index')->with('success', 'Thanh toán VNPay thành công! Game đã về thư viện!');
+                return redirect()->route('checkout.success')->with('order_code', $order->order_code);
             } else {
                 // Khách hủy giao dịch hoặc thẻ hết tiền
                 $order->update(['status' => 'cancelled']);
@@ -255,5 +255,15 @@ class CartController extends Controller
         } else {
             return redirect()->route('cart.index')->with('error', 'Chữ ký VNPay không hợp lệ (Lỗi bảo mật)!');
         }
+    }
+
+    // HÀM HIỂN THỊ TRANG THANH TOÁN THÀNH CÔNG
+    public function success()
+    {
+        // Chống hack: Nếu ai đó tự gõ link /thanh-cong mà không mua hàng thì đá về Trang chủ
+        if (!session('order_code')) {
+            return redirect()->route('home');
+        }
+        return view('cart.success');
     }
 }
