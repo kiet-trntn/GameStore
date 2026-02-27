@@ -116,65 +116,144 @@ class CartController extends Controller
         return response()->json(['status' => 'error', 'message' => 'Không tìm thấy game trong giỏ!'], 404);
     }
 
-    // HÀM XỬ LÝ THANH TOÁN (CHỐT ĐƠN)
+    // 1. HÀM TẠO ĐƠN VÀ ĐẨY SANG VNPAY
     public function checkout(Request $request)
     {
         $user_id = Auth::id();
         $cartItems = Cart::with('game')->where('user_id', $user_id)->get();
 
-        // Check lỡ ai đó hack gọi API khi giỏ hàng trống
         if ($cartItems->isEmpty()) {
-            return response()->json(['status' => 'error', 'message' => 'Giỏ hàng trống trơn lấy gì thanh toán ba?']);
+            return response()->json(['status' => 'error', 'message' => 'Giỏ hàng trống!']);
         }
 
         try {
-            // BẮT ĐẦU GIAO DỊCH (Nếu 1 trong các bước dưới bị lỗi, DB sẽ tự động hoàn tác (rollback) lại từ đầu)
             DB::beginTransaction(); 
 
-            // 1. Tính tổng tiền
+            // Tính tiền
             $totalAmount = 0;
             foreach ($cartItems as $item) {
                 $totalAmount += ($item->game->sale_price ?? $item->game->price) * $item->quantity;
             }
 
-            // 2. Tạo Hóa đơn (Bảng orders)
+            // TẠO HÓA ĐƠN TRẠNG THÁI "PENDING" (Chờ thanh toán)
+            $order_code = 'GAMEX-' . strtoupper(Str::random(6));
             $order = Order::create([
                 'user_id' => $user_id,
-                'order_code' => 'GAMEX-' . strtoupper(Str::random(6)), // Random ra mã như GAMEX-A8F9K2
+                'order_code' => $order_code,
                 'total_amount' => $totalAmount,
-                'payment_method' => 'Thẻ tín dụng / Ví điện tử',
-                'status' => 'completed' // Game digital mua là xong luôn
+                'payment_method' => 'VNPay',
+                'status' => 'pending' // Chờ VNPay xử lý xong mới đổi thành completed
             ]);
 
-            // 3. Tạo Chi tiết Hóa đơn (Bảng order_items)
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'game_id' => $item->game_id,
-                    'price' => $item->game->sale_price ?? $item->game->price // LƯU GIÁ LÚC MUA (Lỡ mai mốt game hết sale thì hóa đơn không bị đổi giá)
+                    'price' => $item->game->sale_price ?? $item->game->price 
                 ]);
             }
-
-            // 4. Xóa sạch giỏ hàng của User này
-            Cart::where('user_id', $user_id)->delete();
-
-            // CHỐT ĐƠN THÀNH CÔNG -> Lưu vĩnh viễn mọi thứ nãy giờ vào Database
             DB::commit(); 
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Thanh toán thành công! Siêu phẩm đã nằm trong thư viện của bạn.',
-                'order_code' => $order->order_code
-            ]);
+            // ===== CODE TẠO LINK VNPAY CHUẨN QUỐC TẾ =====
+            $vnp_Url = env('VNP_URL', "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+            $vnp_Returnurl = env('VNP_RETURN_URL', route('vnpay.return'));
+            $vnp_TmnCode = env('VNP_TMN_CODE'); 
+            $vnp_HashSecret = env('VNP_HASH_SECRET'); 
+
+            $vnp_TxnRef = $order_code; 
+            $vnp_OrderInfo = "Thanh toan don hang GameX: " . $order_code;
+            $vnp_OrderType = 'billpayment';
+            $vnp_Amount = $totalAmount * 100; // VNPay quy định tiền phải nhân 100
+            $vnp_Locale = 'vn';
+            $vnp_BankCode = ''; // Dùng thẻ test của ngân hàng NCB
+            $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
+
+            $inputData = array(
+                "vnp_Version" => "2.1.0",
+                "vnp_TmnCode" => $vnp_TmnCode,
+                "vnp_Amount" => $vnp_Amount,
+                "vnp_Command" => "pay",
+                "vnp_CreateDate" => date('YmdHis'),
+                "vnp_CurrCode" => "VND",
+                "vnp_IpAddr" => $vnp_IpAddr,
+                "vnp_Locale" => $vnp_Locale,
+                "vnp_OrderInfo" => $vnp_OrderInfo,
+                "vnp_OrderType" => $vnp_OrderType,
+                "vnp_ReturnUrl" => $vnp_Returnurl,
+                "vnp_TxnRef" => $vnp_TxnRef
+            );
+
+            if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+                $inputData['vnp_BankCode'] = $vnp_BankCode;
+            }
+            ksort($inputData);
+            $query = "";
+            $i = 0;
+            $hashdata = "";
+            foreach ($inputData as $key => $value) {
+                if ($i == 1) {
+                    $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+                } else {
+                    $hashdata .= urlencode($key) . "=" . urlencode($value);
+                    $i = 1;
+                }
+                $query .= urlencode($key) . "=" . urlencode($value) . '&';
+            }
+
+            $vnp_Url = $vnp_Url . "?" . $query;
+            if (isset($vnp_HashSecret)) {
+                $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+                $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
+            }
+            // Trả cái Link VNPay về cho Javascript chuyển trang
+            return response()->json(['status' => 'success', 'url' => $vnp_Url]);
 
         } catch (\Exception $e) {
-            // CÓ LỖI XẢY RA -> Hủy bỏ toàn bộ thao tác, không lưu bậy bạ
             DB::rollBack(); 
+            return response()->json(['status' => 'error', 'message' => 'Lỗi tạo đơn: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // 2. HÀM HỨNG KẾT QUẢ TỪ VNPAY TRẢ VỀ
+    public function vnpayReturn(Request $request)
+    {
+        $vnp_HashSecret = env('VNP_HASH_SECRET');
+        $inputData = array();
+        foreach ($_GET as $key => $value) {
+            if (substr($key, 0, 4) == "vnp_") {
+                $inputData[$key] = $value;
+            }
+        }
+        $vnp_SecureHash = $inputData['vnp_SecureHash'];
+        unset($inputData['vnp_SecureHash']);
+        ksort($inputData);
+        $i = 0;
+        $hashData = "";
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashData = $hashData . '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashData = $hashData . urlencode($key) . "=" . urlencode($value);
+                $i = 1;
+            }
+        }
+        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
+
+        if ($secureHash == $vnp_SecureHash) {
+            $order = Order::where('order_code', $request->vnp_TxnRef)->first();
             
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Hệ thống bận, vui lòng thử lại! Lỗi: ' . $e->getMessage()
-            ], 500);
+            // Nếu giao dịch thành công (Mã 00)
+            if ($request->vnp_ResponseCode == '00') {
+                $order->update(['status' => 'completed']); // Chốt đơn!
+                Cart::where('user_id', $order->user_id)->delete(); // Xóa giỏ hàng
+                return redirect()->route('cart.index')->with('success', 'Thanh toán VNPay thành công! Game đã về thư viện!');
+            } else {
+                // Khách hủy giao dịch hoặc thẻ hết tiền
+                $order->update(['status' => 'cancelled']);
+                return redirect()->route('cart.index')->with('error', 'Thanh toán thất bại hoặc đã bị hủy!');
+            }
+        } else {
+            return redirect()->route('cart.index')->with('error', 'Chữ ký VNPay không hợp lệ (Lỗi bảo mật)!');
         }
     }
 }

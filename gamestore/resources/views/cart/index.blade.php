@@ -323,15 +323,8 @@
                     })
                     .then(data => {
                         if (data.status === 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Thanh toán Đỉnh Cao!',
-                                text: data.message + ' (Mã HĐ: ' + data.order_code + ')',
-                                confirmButtonColor: '#2563EB',
-                                confirmButtonText: 'Quá đã!'
-                            }).then(() => {
-                                window.location.reload(); 
-                            });
+                            // Ảo thuật xuất hiện: Bay thẳng sang trang VNPay!
+                            window.location.href = data.url; 
                         } else {
                             Swal.fire('Lỗi rồi', data.message, 'error');
                             btnCheckout.innerHTML = originalText;

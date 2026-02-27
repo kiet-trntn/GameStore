@@ -26,7 +26,9 @@ Route::post('/gio-hang/them/{game_id}', [CartController::class, 'add'])->name('c
 // Route xóa game khỏi giỏ (Dùng DELETE cho đúng chuẩn RESTful)
 Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('cart.remove');
 // Route xử lý thanh toán chốt đơn
+// Route Thanh toán & Nhận kết quả từ VNPay
 Route::post('/thanh-toan', [CartController::class, 'checkout'])->name('cart.checkout');
+Route::get('/thanh-toan/vnpay-return', [CartController::class, 'vnpayReturn'])->name('vnpay.return');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
