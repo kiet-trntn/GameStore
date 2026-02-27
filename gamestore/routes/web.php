@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\GameController as UserGameController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\GameController as AdminGameController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AuthController;
@@ -45,6 +46,9 @@ Route::post('/game/{id}/review', [ReviewController::class, 'store'])->name('revi
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
     // CATEGORIES
     Route::get('/categories/trash', [CategoryController::class, 'trash'])->name('categories.trash');
