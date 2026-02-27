@@ -288,6 +288,88 @@
         });
         }
     </script>
+    {{-- Đặt SweetAlert ở Layout luôn vì trang nào cũng xài popup --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    {{-- SCRIPT DÙNG CHUNG CHO TOÀN BỘ WEBSITE --}}
+    <script>
+        // SỬ DỤNG EVENT DELEGATION: Lắng nghe click trên toàn bộ body
+        document.body.addEventListener('click', function(e) {
+            
+            // Tìm xem chỗ vừa click có phải là nút btn-add-cart (hoặc icon bên trong nó) không
+            let button = e.target.closest('.btn-add-cart');
+            
+            // Nếu không phải nút thêm giỏ hàng thì bỏ qua, không làm gì hết
+            if (!button) return; 
+
+            // NẾU ĐÚNG LÀ NÚT THÊM GIỎ HÀNG THÌ CHẠY XUỐNG ĐÂY
+            e.preventDefault(); 
+            
+            let gameId = button.getAttribute('data-id');
+            let url = `/gio-hang/them/${gameId}`;
+            let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Đổi giao diện nút thành loading
+            let originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin text-xl"></i>';
+            button.disabled = true;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(async response => {
+                if (!response.ok && response.status !== 401) {
+                    throw new Error("Lỗi Server: Check Console nha!");
+                }
+                if (response.status === 401) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ối chà!',
+                        text: 'Ba phải đăng nhập mới mua game được nha!',
+                        confirmButtonText: 'Đăng nhập ngay',
+                        confirmButtonColor: '#2563EB'
+                    }).then((result) => {
+                        if (result.isConfirmed) { window.location.href = '/login'; }
+                    });
+                    throw new Error('Chưa đăng nhập');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Trả lại hình dáng ban đầu
+                button.innerHTML = originalContent;
+                button.disabled = false;
+
+                if (data.status === 'success') {
+                    // Cập nhật số đỏ trên Header
+                    let badge = document.getElementById('cart-count-badge');
+                    if (badge) {
+                        badge.innerText = data.cart_count;
+                        badge.classList.remove('hidden'); 
+                    }
+                    Swal.fire({ icon: 'success', title: 'Đã bỏ vô giỏ!', text: data.message, showConfirmButton: false, timer: 1500 });
+                } else if (data.status === 'warning') {
+                    Swal.fire({ icon: 'warning', title: 'Khoan đã!', text: data.message, confirmButtonColor: '#F59E0B' });
+                }
+            })
+            .catch(error => {
+                button.innerHTML = originalContent;
+                button.disabled = false;
+                if(error.message !== 'Chưa đăng nhập') {
+                    console.error(error);
+                    Swal.fire('Lỗi Code Rồi!', 'Bấm F12 qua tab Console xem nó báo gì nha!', 'error');
+                }
+            });
+        });
+    </script>
+
+    {{-- Dành cho các trang muốn nhét thêm code JS riêng --}}
     @yield('scripts')
+
 </body>
 </html>

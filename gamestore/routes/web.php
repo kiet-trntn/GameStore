@@ -25,6 +25,8 @@ Route::get('/gio-hang', [CartController::class, 'index'])->name('cart.index');
 Route::post('/gio-hang/them/{game_id}', [CartController::class, 'add'])->name('cart.add');
 // Route xóa game khỏi giỏ (Dùng DELETE cho đúng chuẩn RESTful)
 Route::delete('/gio-hang/xoa/{id}', [CartController::class, 'remove'])->name('cart.remove');
+// Route xử lý thanh toán chốt đơn
+Route::post('/thanh-toan', [CartController::class, 'checkout'])->name('cart.checkout');
 
 
 Route::prefix('admin')->name('admin.')->group(function () {

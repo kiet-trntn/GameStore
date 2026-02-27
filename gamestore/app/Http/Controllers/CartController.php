@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Game;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use App\Models\Order;
+use App\Models\OrderItem;
 
 class CartController extends Controller
 {
@@ -110,5 +114,67 @@ class CartController extends Controller
         }
 
         return response()->json(['status' => 'error', 'message' => 'Không tìm thấy game trong giỏ!'], 404);
+    }
+
+    // HÀM XỬ LÝ THANH TOÁN (CHỐT ĐƠN)
+    public function checkout(Request $request)
+    {
+        $user_id = Auth::id();
+        $cartItems = Cart::with('game')->where('user_id', $user_id)->get();
+
+        // Check lỡ ai đó hack gọi API khi giỏ hàng trống
+        if ($cartItems->isEmpty()) {
+            return response()->json(['status' => 'error', 'message' => 'Giỏ hàng trống trơn lấy gì thanh toán ba?']);
+        }
+
+        try {
+            // BẮT ĐẦU GIAO DỊCH (Nếu 1 trong các bước dưới bị lỗi, DB sẽ tự động hoàn tác (rollback) lại từ đầu)
+            DB::beginTransaction(); 
+
+            // 1. Tính tổng tiền
+            $totalAmount = 0;
+            foreach ($cartItems as $item) {
+                $totalAmount += ($item->game->sale_price ?? $item->game->price) * $item->quantity;
+            }
+
+            // 2. Tạo Hóa đơn (Bảng orders)
+            $order = Order::create([
+                'user_id' => $user_id,
+                'order_code' => 'GAMEX-' . strtoupper(Str::random(6)), // Random ra mã như GAMEX-A8F9K2
+                'total_amount' => $totalAmount,
+                'payment_method' => 'Thẻ tín dụng / Ví điện tử',
+                'status' => 'completed' // Game digital mua là xong luôn
+            ]);
+
+            // 3. Tạo Chi tiết Hóa đơn (Bảng order_items)
+            foreach ($cartItems as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'game_id' => $item->game_id,
+                    'price' => $item->game->sale_price ?? $item->game->price // LƯU GIÁ LÚC MUA (Lỡ mai mốt game hết sale thì hóa đơn không bị đổi giá)
+                ]);
+            }
+
+            // 4. Xóa sạch giỏ hàng của User này
+            Cart::where('user_id', $user_id)->delete();
+
+            // CHỐT ĐƠN THÀNH CÔNG -> Lưu vĩnh viễn mọi thứ nãy giờ vào Database
+            DB::commit(); 
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Thanh toán thành công! Siêu phẩm đã nằm trong thư viện của bạn.',
+                'order_code' => $order->order_code
+            ]);
+
+        } catch (\Exception $e) {
+            // CÓ LỖI XẢY RA -> Hủy bỏ toàn bộ thao tác, không lưu bậy bạ
+            DB::rollBack(); 
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Hệ thống bận, vui lòng thử lại! Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
