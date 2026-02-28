@@ -16,7 +16,7 @@
             background-image: 
                 radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
                 radial-gradient(circle at 100% 100%, rgba(29, 78, 216, 0.03) 0%, transparent 50%);
-            background-attachment: fixed;
+
         }
         .glass {
             background: rgba(255,255,255,0.03);
@@ -113,39 +113,50 @@
                         @endauth
                     </a>
 
-                    {{-- 4. KHU VỰC TÀI KHOẢN (GUEST vs AUTH) --}}
-                    @guest
-                        {{-- Nếu CHƯA đăng nhập: Hiện nút Đăng nhập --}}
-                        <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20">
-                            Đăng nhập
-                        </a>
-                    @else
-                        {{-- Nếu ĐÃ đăng nhập: Hiện Avatar + Tên + Dropdown menu --}}
-                        <div class="relative group">
-                            <button class="flex items-center gap-2 glass px-3 py-2 rounded-xl hover:bg-white/10 transition-all border border-white/5">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=2563EB&color=fff" class="w-6 h-6 rounded-full">
-                                <span class="text-xs font-bold text-white max-w-[80px] truncate">{{ Auth::user()->name }}</span>
-                                <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
-                            </button>
+                {{-- 4. KHU VỰC TÀI KHOẢN (GUEST vs AUTH) --}}
+                @guest
+                    {{-- Nếu CHƯA đăng nhập: Hiện nút Đăng nhập --}}
+                    <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20">
+                        Đăng nhập
+                    </a>
+                @else
+                    {{-- Nếu ĐÃ đăng nhập: Hiện Avatar + Tên + Dropdown menu --}}
+                    <div class="relative group">
+                        <button class="flex items-center gap-2 glass px-3 py-2 rounded-xl hover:bg-white/10 transition-all border border-white/5">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=2563EB&color=fff" class="w-6 h-6 rounded-full">
+                            <span class="text-xs font-bold text-white max-w-[80px] truncate">{{ Auth::user()->name }}</span>
+                            <i class="fas fa-chevron-down text-[10px] text-gray-400"></i>
+                        </button>
+                        
+                        {{-- Dropdown (Sẽ xổ xuống khi hover chuột) --}}
+                        <div class="absolute right-0 mt-2 w-48 glass rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-white/10 shadow-2xl">
                             
-                            {{-- Dropdown (Sẽ xổ xuống khi hover chuột) --}}
-                            <div class="absolute right-0 mt-2 w-48 glass rounded-2xl overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 border border-white/10 shadow-2xl">
-                                <a href="{{ route('profile.index') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
-                                    <i class="fas fa-user-circle w-4 text-center mr-1"></i> Hồ sơ của tôi
-                                </a>
-                                <a href="{{ route('user.library') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white...">
-                                    <i class="fas fa-shopping-bag w-4 text-center mr-1"></i> Thư viện Game
+                            {{-- CHỈ HIỆN NÚT NÀY NẾU TÀI KHOẢN LÀ ADMIN --}}
+                            @if(Auth::user()->role === 'admin')
+                                <a href="{{ route('admin.dashboard') }}" class="block px-4 py-3 text-xs font-black text-yellow-400 hover:text-yellow-300 hover:bg-white/10 transition-colors bg-white/5">
+                                    <i class="fas fa-user-shield w-4 text-center mr-1"></i> Trang Quản Trị
                                 </a>
                                 <div class="border-t border-white/10 my-1"></div>
-                                <form method="POST" action="{{ route('logout') }}">
-                                    @csrf
-                                    <button type="submit" class="w-full text-left px-4 py-3 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors">
-                                        <i class="fas fa-sign-out-alt w-4 text-center mr-1"></i> Đăng xuất
-                                    </button>
-                                </form>
-                            </div>
+                            @endif
+
+                            <a href="{{ route('profile.index') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-user-circle w-4 text-center mr-1"></i> Hồ sơ của tôi
+                            </a>
+                            <a href="{{ route('user.library') }}" class="block px-4 py-3 text-xs font-bold text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                <i class="fas fa-shopping-bag w-4 text-center mr-1"></i> Thư viện Game
+                            </a>
+                            
+                            <div class="border-t border-white/10 my-1"></div>
+                            
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-3 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors">
+                                    <i class="fas fa-sign-out-alt w-4 text-center mr-1"></i> Đăng xuất
+                                </button>
+                            </form>
                         </div>
-                    @endauth
+                    </div>
+                @endguest {{-- Đã sửa lại thành @endguest cho đúng chuẩn --}}
 
                 </div>
             </div>

@@ -25,6 +25,7 @@
                         <th class="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest">Tài khoản</th>
                         <th class="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest">Email</th>
                         <th class="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest">Ngày tham gia</th>
+                        <th class="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Quyền hạn</th>
                         <th class="py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest text-center">Thao tác</th>
                     </tr>
                 </thead>
@@ -50,6 +51,24 @@
                         </td>
                         <td class="py-4 px-6">
                             <span class="text-sm font-medium text-gray-600">{{ $user->created_at->format('d/m/Y') }}</span>
+                        </td>
+                        {{-- CỘT QUYỀN HẠN --}}
+                        <td class="py-4 px-6 text-center">
+                            @if(auth()->id() == $user->id)
+                                {{-- Nếu là chính mình thì hiện cục Badge chứ không cho sửa --}}
+                                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-black px-3 py-1 rounded-md uppercase tracking-widest border border-indigo-200">
+                                    Admin (Bạn)
+                                </span>
+                            @else
+                                {{-- Nếu là người khác thì hiện Form Select để đổi quyền --}}
+                                <form action="{{ route('admin.users.updateRole', $user->id) }}" method="POST" class="inline-block">
+                                    @csrf
+                                    <select name="role" onchange="this.form.submit()" class="text-xs font-bold border-gray-200 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 hover:bg-white cursor-pointer transition-colors py-2 px-3 {{ $user->role == 'admin' ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-50 text-gray-600' }}">
+                                        <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
+                                        <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Quản trị viên</option>
+                                    </select>
+                                </form>
+                            @endif
                         </td>
                         <td class="py-4 px-6 text-center">
                             {{-- Không hiện nút Xóa nếu là chính mình --}}

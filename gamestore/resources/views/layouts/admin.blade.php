@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - @yield('title')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -25,19 +26,27 @@
                     Sản phẩm (Games)
                 </a>
                 
-                {{-- Cập nhật Link và màu Active cho Đơn Hàng --}}
                 <a href="{{ route('admin.orders.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/orders*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">
                     Đơn hàng
                 </a>
             
-                {{-- Thêm Link Quản lý Thành viên --}}
                 <a href="{{ route('admin.users.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/users*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">
                     Thành viên
                 </a>
             
-                {{-- Thêm Link Kiểm duyệt Đánh giá --}}
                 <a href="{{ route('admin.reviews.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/reviews*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">
                     Đánh giá
+                </a>
+            
+                {{-- Vách ngăn cách điệu --}}
+                <div class="border-t border-indigo-500/30 my-4"></div>
+            
+                {{-- Nút "Búng" ra ngoài Trang chủ --}}
+                <a href="{{ route('home') }}" target="_blank" class="block py-2.5 px-4 rounded hover:bg-indigo-800 text-indigo-200 hover:text-white transition flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Về Trang cửa hàng
                 </a>
             </nav>
         </aside>
@@ -158,5 +167,6 @@
         })
     }
     </script>
+    @yield('scripts')
 </body>
 </html>

@@ -17,7 +17,7 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
-    // 2. XÓA THÀNH VIÊN (TRẢM!)
+    // 2. XÓA THÀNH VIÊN 
     public function destroy($id)
     {
         // Không cho phép Admin tự xóa chính mình (chống "tự hủy")
@@ -29,5 +29,23 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['status' => 'success', 'message' => 'Đã tiễn thành viên này ra đảo!']);
+    }
+
+    // 3. CẬP NHẬT QUYỀN HẠN 
+    public function updateRole(Request $request, $id)
+    {
+        $request->validate([
+            'role' => 'required|in:user,admin'
+        ]);
+
+        // Chống tự hủy: Không cho Admin tự giáng chức chính mình
+        if (auth()->id() == $id) {
+            return back()->with('error', 'Không thay đổi được admin');
+        }
+
+        $user = User::findOrFail($id);
+        $user->update(['role' => $request->role]);
+
+        return back()->with('success', 'Đã cập nhật chức vụ cho ' . $user->name . ' thành công!');
     }
 }

@@ -12,7 +12,7 @@
                     
                     <div class="swiper-slide relative h-[450px] md:h-[600px] overflow-hidden group">
                         <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1920" 
-                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-[5000ms] group-active:scale-110 scale-105">
+                             class="absolute inset-0 w-full h-full object-cover transition-transform transform-gpu will-change-transform duration-[5000ms] group-active:scale-110 scale-105">
                         
                         <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent opacity-90"></div>
                         <div class="absolute inset-0 flex flex-col justify-end p-8 md:p-16 lg:p-24">
@@ -113,7 +113,7 @@
     
                 <a href="{{ route('game', ['category' => $category->slug]) }}" class="{{ $class }} group relative h-64 overflow-hidden rounded-[2rem] border border-white/5 shadow-xl">
                     {{-- Đổ biến $imageSrc vào đây --}}
-                    <img src="{{ $imageSrc }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $category->name }}">
+                    <img src="{{ $imageSrc }}" loading="lazy" class="absolute  inset-0 w-full h-full object-cover transition-transform transform-gpu will-change-transform duration-700 group-hover:scale-110" alt="{{ $category->name }}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
                     
                     <div class="absolute inset-x-0 bottom-0 p-6 {{ $index % 4 == 3 ? 'text-right' : '' }}">
@@ -138,81 +138,72 @@
 
     <!-- Game hot trong tuần -->
     <section class="container mx-auto px-4 md:px-10 py-16 relative z-10">
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-4">
-                <div class="w-1.5 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
-                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase italic">Top 5 Hot <span class="text-gray-500 font-light">Tuần Này</span></h2>
-            </div>
-            
-            <div class="flex gap-3">
-                <button class="hot-prev w-11 h-11 glass rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <button class="hot-next w-11 h-11 glass rounded-2xl flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </div>
+        {{-- Bỏ luôn cục nút Next/Prev, chỉ giữ lại Tiêu đề --}}
+        <div class="flex items-center gap-4 mb-8">
+            <div class="w-1.5 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
+            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase italic">Top 5 Hot <span class="text-gray-500 font-light">Tuần Này</span></h2>
         </div>
     
-        <div class="swiper hotGamesSwiper !overflow-visible">
-            <div class="swiper-wrapper">
+        {{-- Dùng Grid dàn 5 cột trên PC, 3 cột trên Ipad, 2 cột trên điện thoại --}}
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                 
-                {{-- Đổ 5 game hot từ biến $hotGames --}}
-                @forelse($hotGames as $index => $game)
-                    <div class="swiper-slide group">
-                        <a href="{{ route('game.detail', $game->slug) }}" class="block relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
-                            
-                            {{-- Ảnh đại diện Game --}}
-                            @if($game->image)
-                                <img src="{{ asset('storage/' . $game->image) }}" alt="{{ $game->title }}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            @else
-                                <div class="absolute inset-0 w-full h-full bg-gray-800 flex items-center justify-center">
-                                    <span class="text-gray-500 text-sm">No Image</span>
-                                </div>
-                            @endif
-                            
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent opacity-90"></div>
-                            
-                            {{-- Gắn tag TOP 1 -> 5 cho tất cả --}}
-                            <div class="absolute top-4 left-4">
-                                <span class="glass px-3 py-1 rounded-lg text-[10px] font-black {{ $index == 0 ? 'text-yellow-400 border-yellow-400/30' : 'text-blue-400 border-blue-400/20' }} uppercase tracking-tighter border shadow-lg bg-black/40 backdrop-blur-md">
-                                    Top {{ $index + 1 }}
-                                </span>
+            {{-- Đổ 5 game hot từ biến $hotGames --}}
+            @forelse($hotGames as $index => $game)
+                {{-- Bỏ class swiper-slide đi --}}
+                <div class="group">
+                    <a href="{{ route('game.detail', $game->slug) }}" class="block relative aspect-[3/4.2] rounded-[2rem] overflow-hidden border border-white/10 bg-[#121215] shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-blue-500/20 group-hover:shadow-2xl">
+                        
+                        {{-- Ảnh đại diện Game (Đã kẹp bùa chống lag) --}}
+                        @if($game->image)
+                            <img loading="lazy" src="{{ asset('storage/' . $game->image) }}" alt="{{ $game->title }}" loading="lazy" class="absolute inset-0 w-full h-full object-cover transition-transform transform-gpu will-change-transform duration-700 group-hover:scale-110 transform-gpu will-change-transform">
+                        @else
+                            <div class="absolute inset-0 w-full h-full bg-gray-800 flex items-center justify-center">
+                                <span class="text-gray-500 text-sm">No Image</span>
                             </div>
-    
-                            {{-- Thông tin Game --}}
-                            <div class="absolute inset-x-0 bottom-0 p-6">
-                                <h3 class="text-lg font-bold text-white mb-2 leading-tight line-clamp-2 group-hover:text-blue-400 transition-colors">
-                                    {{ $game->title }}
-                                </h3>
+                        @endif
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-transparent to-transparent opacity-90 transform-gpu pointer-events-none"></div>
+                        
+                        {{-- Gắn tag TOP 1 -> 5 cho tất cả --}}
+                        <div class="absolute top-4 left-4">
+                            <span class="glass px-3 py-1 rounded-lg text-[10px] font-black {{ $index == 0 ? 'text-yellow-400 border-yellow-400/30' : 'text-blue-400 border-blue-400/20' }} uppercase tracking-tighter border shadow-lg bg-black/40 backdrop-blur-md">
+                                Top {{ $index + 1 }}
+                            </span>
+                        </div>
+
+                        {{-- Thông tin Game --}}
+                        <div class="absolute inset-x-0 bottom-0 p-4 md:p-6">
+                            <h3 class="text-sm md:text-lg font-bold text-white mb-2 leading-tight line-clamp-2 group-hover:text-blue-400 transition-colors">
+                                {{ $game->title }}
+                            </h3>
+                            
+                            <div class="flex items-center justify-between">
+                                {{-- Hiển thị Giá --}}
+                                <div>
+                                    @if($game->sale_price)
+                                        <div class="text-gray-400 text-[10px] md:text-xs line-through mb-0.5">{{ number_format($game->price, 0, ',', '.') }}đ</div>
+                                        <span class="text-blue-400 font-black text-sm md:text-base">{{ number_format($game->sale_price, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500 italic">đ</span></span>
+                                    @else
+                                        <span class="text-blue-400 font-black text-sm md:text-base">{{ number_format($game->price, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500 italic">đ</span></span>
+                                    @endif
+                                </div>
                                 
-                                <div class="flex items-center justify-between">
-                                    {{-- Hiển thị Giá --}}
-                                    <div>
-                                        @if($game->sale_price)
-                                            <div class="text-gray-400 text-xs line-through mb-0.5">{{ number_format($game->price, 0, ',', '.') }}đ</div>
-                                            <span class="text-blue-400 font-black text-base">{{ number_format($game->sale_price, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500 italic">đ</span></span>
-                                        @else
-                                            <span class="text-blue-400 font-black text-base">{{ number_format($game->price, 0, ',', '.') }} <span class="text-[10px] font-normal text-gray-500 italic">đ</span></span>
-                                        @endif
-                                    </div>
-                                    
-                                    {{-- Icon xem chi tiết --}}
-                                    <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 4v16m8-8H4" stroke-width="3"/></svg>
-                                    </div>
+                                {{-- Icon xem chi tiết --}}
+                                <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 4v16m8-8H4" stroke-width="3"/></svg>
                                 </div>
                             </div>
-                        </a>
-                    </div>
-                @empty
-                    <div class="text-gray-500 italic w-full text-center py-10 border border-dashed border-white/10 rounded-2xl bg-white/5">
-                        <i class="fas fa-star mb-2 text-2xl text-gray-600"></i><br>
-                        Chưa có game hot nào được đánh dấu sao.
-                    </div>
-                @endforelse
-    
-            </div>
+                        </div>
+                    </a>
+                </div>
+            @empty
+                {{-- col-span-full để cái bảng báo trống nó chài dài ra giữa màn hình --}}
+                <div class="col-span-full text-gray-500 italic w-full text-center py-10 border border-dashed border-white/10 rounded-2xl bg-white/5">
+                    <i class="fas fa-star mb-2 text-2xl text-gray-600"></i><br>
+                    Chưa có game hot nào được đánh dấu sao.
+                </div>
+            @endforelse
+
         </div>
     </section>
 
@@ -220,8 +211,8 @@
     <section class="container mx-auto px-4 md:px-10 py-12">
         <div class="relative w-full min-h-[350px] md:h-[450px] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl group bg-[#0a0a0c]">
             
-            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920" 
-                 class="absolute inset-0 w-full h-full object-cover opacity-60 scale-105 group-hover:scale-110 transition-transform duration-[3000ms]">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920" 
+                 class="absolute inset-0 w-full h-full object-cover opacity-60 scale-105 group-hover:scale-110 transition-transform transform-gpu will-change-transform duration-[3000ms]">
             
             <div class="absolute inset-0 bg-gradient-to-r from-[#08080a] via-[#08080a]/80 to-blue-600/10"></div>
             
@@ -269,8 +260,8 @@
                 </div>
             </div>
     
-            <div class="absolute -top-20 -right-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full"></div>
-            <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-600/10 blur-[100px] rounded-full"></div>
+            <div class="absolute -top-20 -right-20 w-80 h-80 bg-blue-600/10 blur-[100px] rounded-full transform-gpu pointer-events-none"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-600/10 blur-[100px] rounded-full transform-gpu pointer-events-none"></div>
         </div>
     </section>
 
@@ -290,8 +281,8 @@
                 <div class="flex flex-col gap-2">
                     @forelse($newGames as $game)
                         <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
-                            <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150' }}" 
-                                 class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
+                            <img loading="lazy" src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=150' }}" 
+                                 class="w-16 h-20 object-cover rounded-xl transition-transform transform-gpu will-change-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold text-white group-hover:text-green-400 transition-colors line-clamp-1">{{ $game->title }}</h4>
                                 <span class="text-sm font-black text-blue-400">
@@ -317,8 +308,8 @@
                 <div class="flex flex-col gap-2">
                     @forelse($popularGames as $game)
                         <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
-                            <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150' }}" 
-                                 class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
+                            <img loading="lazy" src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=150' }}" 
+                                 class="w-16 h-20 object-cover rounded-xl transition-transform transform-gpu will-change-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold text-white group-hover:text-orange-400 transition-colors line-clamp-1">{{ $game->title }}</h4>
                                 <span class="text-sm font-black text-blue-400">
@@ -344,8 +335,8 @@
                 <div class="flex flex-col gap-2">
                     @forelse($upcomingGames as $game)
                         <a href="{{ route('game.detail', $game->slug) }}" class="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10">
-                            <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150' }}" 
-                                 class="w-16 h-20 object-cover rounded-xl transition-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
+                            <img loading="lazy" src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=150' }}" 
+                                 class="w-16 h-20 object-cover rounded-xl transition-transform transform-gpu will-change-transform duration-300 group-hover:scale-105" alt="{{ $game->title }}">
                             <div class="flex-grow">
                                 <h4 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">{{ $game->title }}</h4>
                                 {{-- Vì là sắp ra mắt nên tui để chữ Coming Soon màu đỏ cho ngầu, sau này ba làm cột release_date thì mình in ngày ra --}}
@@ -377,8 +368,8 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             <div class="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl h-[500px]">
-                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                <img loading="lazy" src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200" 
+                     class="absolute inset-0 w-full h-full object-cover transition-transform transform-gpu will-change-transform duration-1000 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/40 to-transparent"></div>
                 
                 <div class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
@@ -402,7 +393,7 @@
                 
                 <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
                     <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
                     </div>
                     <div class="flex flex-col justify-center">
                         <span class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cập nhật</span>
@@ -415,7 +406,7 @@
     
                 <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
                     <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
                     </div>
                     <div class="flex flex-col justify-center">
                         <span class="text-purple-500 text-[10px] font-bold uppercase tracking-widest mb-1">Phần cứng</span>
@@ -428,7 +419,7 @@
     
                 <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
                     <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                        <img loading="lazy" src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
                     </div>
                     <div class="flex flex-col justify-center">
                         <span class="text-green-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cộng đồng</span>

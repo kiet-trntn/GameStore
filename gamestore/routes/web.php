@@ -46,7 +46,7 @@ Route::post('/ho-so/doi-mat-khau', [ProfileController::class, 'updatePassword'])
 Route::post('/game/{id}/review', [ReviewController::class, 'store'])->name('review.store')->middleware('auth');
 
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
@@ -55,6 +55,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // ROUTE QUẢN LÝ USER
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{id}/role', [AdminUserController::class, 'updateRole'])->name('users.updateRole');
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::post('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
