@@ -8,12 +8,29 @@ use App\Models\Order;
 
 class OrderController extends Controller
 {
-    // 1. HIỂN THỊ DANH SÁCH ĐƠN HÀNG
-    public function index()
+    // 1. HIỂN THỊ DANH SÁCH & TÌM KIẾM ĐƠN HÀNG
+    public function index(Request $request)
     {
-        // Lấy đơn hàng mới nhất xếp lên đầu, kèm theo thông tin User
-        // Phân trang 10 đơn 1 trang cho giao diện khỏi bị dài sọc
-        $orders = Order::with('user')->orderBy('created_at', 'desc')->paginate(10);
+        // Lấy từ khóa tìm kiếm
+        $keyword = $request->input('keyword');
+
+        // Khởi tạo query kéo theo thông tin user
+        $query = Order::with('user');
+
+        // Nếu có từ khóa, tìm theo Mã đơn HOẶC tìm xuyên qua bảng User (tên/email)
+        if ($keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('order_code', 'like', "%{$keyword}%")
+                  ->orWhereHas('user', function($userQuery) use ($keyword) {
+                      $userQuery->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('email', 'like', "%{$keyword}%");
+                  });
+            });
+        }
+
+        // Lấy dữ liệu, phân trang và nhớ giữ lại từ khóa trên URL
+        $orders = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        
         return view('admin.orders.index', compact('orders'));
     }
 

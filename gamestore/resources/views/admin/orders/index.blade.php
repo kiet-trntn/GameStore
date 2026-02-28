@@ -14,6 +14,32 @@
         </div>
     </div>
 
+    {{-- THANH TÌM KIẾM ĐƠN HÀNG --}}
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+        <form action="{{ route('admin.orders.index') }}" method="GET">
+            <div class="flex gap-4 items-center">
+                <div class="relative flex-grow max-w-lg">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" name="keyword" value="{{ request('keyword') }}" 
+                           placeholder="Nhập mã đơn (VD: GAMEX-...), tên hoặc email khách hàng..." 
+                           class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none text-sm transition-all">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20">
+                    Tra cứu
+                </button>
+                
+                {{-- Nếu đang tìm kiếm thì hiện nút Bỏ lọc --}}
+                @if(request('keyword'))
+                    <a href="{{ route('admin.orders.index') }}" class="text-gray-500 hover:text-red-500 font-bold text-sm transition-colors">
+                        <i class="fas fa-times-circle mr-1"></i> Bỏ lọc
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
     {{-- BẢNG DANH SÁCH ĐƠN HÀNG --}}
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">

@@ -8,12 +8,25 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    // 1. HIỂN THỊ DANH SÁCH THÀNH VIÊN
-    public function index()
+    // 1. HIỂN THỊ DANH SÁCH & TÌM KIẾM THÀNH VIÊN
+    public function index(Request $request)
     {
-        // Lấy danh sách user, thằng nào mới đăng ký thì xếp lên đầu. 
-        // Phân trang 10 người / trang.
-        $users = User::orderBy('created_at', 'desc')->paginate(10);
+        // Lấy từ khóa tìm kiếm từ URL (ví dụ: ?keyword=kiet)
+        $keyword = $request->input('keyword');
+
+        // Khởi tạo query
+        $query = User::query();
+
+        // Nếu có nhập từ khóa thì ráp thêm điều kiện tìm kiếm (Tìm theo Tên hoặc Email)
+        if ($keyword) {
+            $query->where('name', 'like', "%{$keyword}%")
+                  ->orWhere('email', 'like', "%{$keyword}%");
+        }
+
+        // Lấy danh sách, phân trang và NHỚ nối thêm từ khóa vào URL phân trang (withQueryString)
+        // Để khi bấm sang trang 2, trang 3 nó không bị rớt mất từ khóa đang tìm.
+        $users = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
         return view('admin.users.index', compact('users'));
     }
 
