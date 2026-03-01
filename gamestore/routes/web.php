@@ -49,6 +49,8 @@ Route::post('/game/{id}/review', [ReviewController::class, 'store'])->name('revi
 Route::get('/tin-tuc', [App\Http\Controllers\NewsController::class, 'index'])->name('news.index');
 Route::get('/tin-tuc/{slug}', [App\Http\Controllers\NewsController::class, 'show'])->name('news.show');
 
+Route::post('/chatbot/ask', [App\Http\Controllers\ChatbotController::class, 'ask'])->name('chatbot.ask');
+
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

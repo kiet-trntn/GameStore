@@ -7,7 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    {{-- 3. Thư viện FontAwesome (Để hiện cái icon hình con Robot và nút Gửi tin nhắn) --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -234,6 +237,85 @@
         </div>
     </footer>
 
+
+    {{-- BONG BÓNG CHATBOT AI --}}
+    <div x-data="{ openChat: false, message: '', chatHistory: [{sender: 'bot', text: 'Chào ba! Tui là AI tư vấn của GameX. Ba xài máy cấu hình sao, đang thèm chơi thể loại gì cứ nói tui tư vấn cho nha! 🎮'}] }" 
+         class="fixed bottom-6 right-6 z-[100] font-sans">
+        
+        {{-- Nút gọi hồn Chatbot --}}
+        <button @click="openChat = !openChat" class="w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-2xl flex items-center justify-center text-white hover:scale-110 transition-transform relative">
+            <i class="fas" :class="openChat ? 'fa-times text-xl' : 'fa-robot text-2xl'"></i>
+            <span x-show="!openChat" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping"></span>
+            <span x-show="!openChat" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-[#08080a]"></span>
+        </button>
+
+        {{-- Cửa sổ Chat --}}
+        <div x-show="openChat" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-10"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-10"
+             class="absolute bottom-20 right-0 w-80 md:w-96 bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-100 flex flex-col" style="height: 500px; display: none;">
+            
+            {{-- Header Chat --}}
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl backdrop-blur-sm">🤖</div>
+                <div>
+                    <h3 class="font-black text-sm uppercase tracking-widest">GameX AI Advisor</h3>
+                    <p class="text-[10px] text-blue-200 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-400"></span> Trực tuyến</p>
+                </div>
+            </div>
+
+            {{-- Khung hiển thị tin nhắn --}}
+            <div id="chat-box" class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
+                <template x-for="(msg, index) in chatHistory" :key="index">
+                    <div class="flex" :class="msg.sender === 'user' ? 'justify-end' : 'justify-start'">
+                        <div class="max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm"
+                             :class="msg.sender === 'user' ? 'bg-blue-600 text-white rounded-tr-sm' : 'bg-white border border-gray-100 text-gray-700 rounded-tl-sm'"
+                             x-html="msg.text">
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Chỗ nhập câu hỏi --}}
+            <div class="p-4 bg-white border-t border-gray-100">
+                <form @submit.prevent="
+                    if(message.trim() === '') return;
+                    let userText = message;
+                    chatHistory.push({sender: 'user', text: userText});
+                    message = '';
+                    
+                    // Thêm dòng Đang gõ chữ...
+                    let botIndex = chatHistory.push({sender: 'bot', text: '<i class=\'fas fa-ellipsis-h animate-pulse\'></i>'}) - 1;
+                    
+                    setTimeout(() => { document.getElementById('chat-box').scrollTop = 9999; }, 50);
+
+                    fetch('{{ route('chatbot.ask') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=\'csrf-token\']').getAttribute('content')
+                        },
+                        body: JSON.stringify({ message: userText })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        chatHistory[botIndex].text = data.reply;
+                        setTimeout(() => { document.getElementById('chat-box').scrollTop = 9999; }, 50);
+                    });
+                " class="flex items-center gap-2">
+                    <input type="text" x-model="message" placeholder="Hỏi cấu hình, tư vấn game..." class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-gray-800">
+                    <button type="submit" class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-md">
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
 
@@ -375,5 +457,6 @@
     {{-- Dành cho các trang muốn nhét thêm code JS riêng --}}
     @yield('scripts')
 
+    
 </body>
 </html>
