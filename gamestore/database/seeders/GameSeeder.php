@@ -12,180 +12,239 @@ class GameSeeder extends Seeder
 {
     public function run()
     {
-        // Lấy danh sách ID của các danh mục đang có để gán ngẫu nhiên cho Game
-        // Đảm bảo không bị lỗi khóa ngoại (Foreign Key)
+        // Lấy ID danh mục để random
         $categoryIds = Category::pluck('id')->toArray();
-
-        // Nếu chưa có danh mục nào thì ngưng, báo lỗi (phòng hờ)
         if (empty($categoryIds)) {
-            $this->command->info('Ba phải chạy CategorySeeder trước nha!');
+            $this->command->info('Ba nhớ chạy CategorySeeder trước nha!');
             return;
         }
 
+        // Cấu hình chung cho gọn
+        $requirements = [
+            'os' => 'Windows 10 64-bit',
+            'cpu' => 'Core i5-11400H',
+            'ram' => '16GB',
+            'gpu' => 'RTX 3050'
+        ];
+
         $games = [
+            [
+                'title' => 'Baldur\'s Gate 3',
+                'description' => '<p>Kiệt tác nhập vai D&D. Tự do định hình câu chuyện của riêng bạn với hàng ngàn ngã rẽ và kết cục khác nhau.</p>',
+                'price' => 1250000,
+                'sale_price' => 990000,
+                'developer' => 'Larian Studios',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1086940/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => '1T22NuDjsNc',
+            ],
             [
                 'title' => 'Black Myth: Wukong',
                 'description' => '<p>Siêu phẩm hành động nhập vai lấy cảm hứng từ Tây Du Ký. Đồ họa Unreal Engine 5 đỉnh cao.</p>',
                 'price' => 1299000,
                 'sale_price' => null,
                 'developer' => 'Game Science',
-                'trailer_link' => 'https://www.youtube.com/embed/v=xyz',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subMonths(2),
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2358720/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'v=xyz',
             ],
             [
-                'title' => 'Cyberpunk 2077: Phantom Liberty',
-                'description' => '<p>Bản mở rộng xuất sắc nhất của Cyberpunk. Khám phá quận Dogtown đầy rẫy hiểm nguy và tội phạm.</p>',
+                'title' => 'Cyberpunk 2077',
+                'description' => '<p>Khám phá Night City rộng lớn và đầy rẫy tội phạm trong siêu phẩm nhập vai thế giới mở này.</p>',
                 'price' => 990000,
-                'sale_price' => 790000, // Đang Sale nè
+                'sale_price' => 495000,
                 'developer' => 'CD PROJEKT RED',
-                'trailer_link' => 'https://www.youtube.com/embed/v=abc',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(1),
-            ],
-            [
-                'title' => 'EA SPORTS FC 24',
-                'description' => '<p>Kỷ nguyên mới của game bóng đá với công nghệ HyperMotionV siêu chân thực.</p>',
-                'price' => 1090000,
-                'sale_price' => 545000, // Giảm 50%
-                'developer' => 'EA Sports',
-                'trailer_link' => 'https://www.youtube.com/embed/v=def',
-                'is_featured' => 0,
-                'release_date' => Carbon::now()->subMonths(6),
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1091500/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'QkkoHAzjnUs',
             ],
             [
                 'title' => 'Resident Evil 4 Remake',
-                'description' => '<p>Sự hồi sinh của huyền thoại kinh dị sinh tồn. Theo chân Leon cứu con gái tổng thống.</p>',
+                'description' => '<p>Sự hồi sinh của huyền thoại kinh dị sinh tồn. Theo chân Leon cứu con gái tổng thống trong một ngôi làng đầy kinh hãi.</p>',
                 'price' => 1140000,
-                'sale_price' => null,
+                'sale_price' => 750000,
                 'developer' => 'CAPCOM',
-                'trailer_link' => 'https://www.youtube.com/embed/v=ghi',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(1)->addMonths(2),
-            ],
-            [
-                'title' => 'Red Dead Redemption 2',
-                'description' => '<p>Thế giới mở miền Tây hoang dã vĩ đại nhất từng được tạo ra. Một kiệt tác nghệ thuật.</p>',
-                'price' => 1000000,
-                'sale_price' => 330000, // Sale sập sàn
-                'developer' => 'Rockstar Games',
-                'trailer_link' => 'https://www.youtube.com/embed/v=jkl',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(5),
-            ],
-            [
-                'title' => 'Hollow Knight: Silksong',
-                'description' => '<p>Siêu phẩm Indie được mong chờ nhất. Khám phá vương quốc của lụa và bài hát.</p>',
-                'price' => 350000,
-                'sale_price' => null,
-                'developer' => 'Team Cherry',
-                'trailer_link' => 'https://www.youtube.com/embed/v=mno',
-                'is_featured' => 0,
-                'release_date' => Carbon::now()->addMonths(3), // Sắp ra mắt (Tương lai)
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2050650/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'j5Xv2lM9SNo',
             ],
             [
                 'title' => 'Elden Ring',
-                'description' => '<p>Hành trình trở thành Elden Lord trong thế giới mở kỳ vĩ do Hidetaka Miyazaki và nhà văn George R. R. Martin kiến tạo. Siêu phẩm GOTY 2022.</p>',
+                'description' => '<p>Hành trình trở thành Elden Lord trong thế giới mở kỳ vĩ. Siêu phẩm khó nhằn nhưng cực kỳ gây nghiện.</p>',
                 'price' => 1090000,
-                'sale_price' => null, // Game hot không thèm sale
+                'sale_price' => null,
                 'developer' => 'FromSoftware',
-                'trailer_link' => 'https://www.youtube.com/embed/E3Huy2cdih0',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(2),
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1245620/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'E3Huy2cdih0',
             ],
             [
-                'title' => 'Baldur\'s Gate 3',
-                'description' => '<p>Kiệt tác nhập vai D&D. Tự do định hình câu chuyện của riêng bạn với hàng ngàn ngã rẽ và kết cục khác nhau.</p>',
-                'price' => 1250000,
-                'sale_price' => 990000, // Đang sale nhẹ
-                'developer' => 'Larian Studios',
-                'trailer_link' => 'https://www.youtube.com/embed/1T22NuDjsNc',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subMonths(8),
+                'title' => 'Red Dead Redemption 2',
+                'description' => '<p>Câu chuyện sử thi về lòng trung thành và sự cứu rỗi ở bình minh của thời đại hiện đại tại miền Tây nước Mỹ.</p>',
+                'price' => 1000000,
+                'sale_price' => 330000,
+                'developer' => 'Rockstar Games',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1174180/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'eaW0tYpxn0k',
             ],
             [
-                'title' => 'Grand Theft Auto V',
-                'description' => '<p>Tựa game huyền thoại không cần giới thiệu. Ba nhân vật, một thành phố Los Santos rộng lớn và điên rồ.</p>',
-                'price' => 450000,
-                'sale_price' => 225000, // Sale 50%
-                'developer' => 'Rockstar North',
-                'trailer_link' => 'https://www.youtube.com/embed/QkkoHAzjnUs',
-                'is_featured' => 0, // Game cũ rồi, không cho lên top banner nữa
-                'release_date' => Carbon::now()->subYears(10),
-            ],
-            [
-                'title' => 'Ghost of Tsushima',
-                'description' => '<p>Hóa thân thành Samurai cuối cùng của đảo Tsushima. Đồ họa đẹp như một bài thơ, chặt chém cực kỳ sướng tay.</p>',
-                'price' => 1399000,
-                'sale_price' => 899000,
-                'developer' => 'Sucker Punch',
-                'trailer_link' => 'https://www.youtube.com/embed/MUz539AeC5Y',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(3),
-            ],
-            [
-                'title' => 'The Witcher 3: Wild Hunt',
-                'description' => '<p>Săn lùng quái vật, khám phá lục địa Continent đầy rẫy ma thuật và những câu chuyện đẫm máu cùng Geralt.</p>',
-                'price' => 750000,
-                'sale_price' => 150000, // Sale sập sàn dọn kho
-                'developer' => 'CD PROJEKT RED',
-                'trailer_link' => 'https://www.youtube.com/embed/c0i88t0Kacs',
-                'is_featured' => 0,
-                'release_date' => Carbon::now()->subYears(8),
-            ],
-            [
-                'title' => 'Where Winds Meet (Yến Vân Thập Lục Thanh)',
-                'description' => '<p>Tuyệt tác thế giới mở lấy bối cảnh Thập Quốc loạn lạc. Hóa thân thành hiệp khách giang hồ, tự do hành tẩu, học tuyệt học võ công và định đoạt số phận của chính mình.</p>',
+                'title' => 'Where Winds Meet',
+                'description' => '<p>Tuyệt tác thế giới mở lấy bối cảnh Thập Quốc loạn lạc. Hóa thân thành hiệp khách giang hồ, tự do hành tẩu và định đoạt số phận của chính mình.</p>',
                 'price' => 990000,
                 'sale_price' => null, // Game sắp ra mắt nên chưa sale
                 'developer' => 'Everstone Studio',
-                'trailer_link' => 'https://www.youtube.com/embed/0gI2N10QyOA',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->addMonths(2), // Đẩy ngày ra mắt lên tương lai
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2607890/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => '0gI2N10QyOA',
+                'release_date' => Carbon::create(2027, 5, 20), // Đẩy sang tương lai
             ],
             [
-                'title' => 'Bloody Roar: Resurgence',
-                'description' => '<p>Huyền thoại đấu võ thú đã trở lại! Nền đồ họa Unreal Engine 5 hoàn toàn mới, giữ nguyên lối chơi bạo liệt và khả năng hóa thú kinh điển làm nức lòng game thủ.</p>',
-                'price' => 850000,
-                'sale_price' => 450000, // Đang sale mạnh
-                'developer' => 'Hudson Soft',
-                'trailer_link' => 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-                'is_featured' => 0,
-                'release_date' => Carbon::now()->subMonths(5),
+                'title' => 'Hollow Knight: Silksong',
+                'description' => '<p>Siêu phẩm Indie được mong chờ nhất thập kỷ. Khám phá vương quốc của lụa và bài hát cùng nàng Hornet xinh đẹp.</p>',
+                'price' => 350000,
+                'sale_price' => null,
+                'developer' => 'Team Cherry',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1030300/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'mno',
+                'release_date' => Carbon::create(2027, 12, 30), // Sắp ra mắt
+            ],
+            [
+                'title' => 'Grand Theft Auto VI',
+                'description' => '<p>Siêu phẩm của mọi thời đại. Trở lại Vice City với quy mô lớn chưa từng có. Một cuộc cách mạng về đồ họa và lối chơi thế giới mở.</p>',
+                'price' => 1750000,
+                'sale_price' => null,
+                'developer' => 'Rockstar Games',
+                'image' => 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'QdBZY2fkU-0',
+                'release_date' => Carbon::create(2027, 1, 1)->format('Y-m-d'),
+            ],
+            [
+                'title' => 'Ghost of Tsushima DIRECTOR\'S CUT',
+                'description' => '<p>Trải nghiệm cuộc chiến bảo vệ đảo Đối Mã trong vai samurai Jin Sakai. Một kiệt tác về hình ảnh và tinh thần võ sĩ đạo.</p>',
+                'price' => 1299000,
+                'sale_price' => 990000,
+                'developer' => 'Sucker Punch Productions',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2215430/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'mTiPkhzYevg',
+            ],
+            [
+                'title' => 'Sekiro: Shadows Die Twice',
+                'description' => '<p>Game hành động khó nhằn từ FromSoftware. Tập trung vào kỹ năng phản đòn (parry) cực kỳ lôi cuốn trong bối cảnh Nhật Bản thời Chiến Quốc.</p>',
+                'price' => 1290000,
+                'sale_price' => 645000,
+                'developer' => 'FromSoftware',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/814380/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1580234811497-9bd7fd0f56ee?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1552825206-38142fb615e5?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'rXMX4YJ7Lks',
+            ],
+            [
+                'title' => 'The Witcher 3: Wild Hunt',
+                'description' => '<p>Hành trình của thợ săn quái vật Geralt đi tìm con gái nuôi Ciri. Một trong những game nhập vai hay nhất mọi thời đại.</p>',
+                'price' => 390000,
+                'sale_price' => 97000,
+                'developer' => 'CD PROJEKT RED',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/292030/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'XHrskkqv9KY',
+            ],
+            [
+                'title' => 'Bloody Roar 2',
+                'description' => '<p>Huyền thoại võ thú thế hệ 8x, 9x. Trải nghiệm những màn biến hình mãn nhãn và các combo rực lửa giữa những chiến binh thú.</p>',
+                'price' => 150000,
+                'sale_price' => null,
+                'developer' => 'Eighting/Raizing',
+                'image' => 'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1200',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'y_vS6F_G_V0',
             ],
             [
                 'title' => 'God of War Ragnarök',
-                'description' => '<p>Cùng Kratos và Atreus du hành qua Cửu Giới để ngăn chặn tận thế Ragnarök. Câu chuyện cha con đầy cảm xúc cùng hệ thống chiến đấu mãn nhãn.</p>',
-                'price' => 1450000,
-                'sale_price' => 1150000,
+                'description' => '<p>Hành trình cuối cùng của cha con Kratos trong thần thoại Bắc Âu. Đối đầu với Thor và Odin để ngăn chặn ngày tận thế.</p>',
+                'price' => 1290000,
+                'sale_price' => 850000,
                 'developer' => 'Santa Monica Studio',
-                'trailer_link' => 'https://www.youtube.com/embed/hfJ4Km46A-0',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subYears(1),
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2322010/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'hfJ4Km46A-0',
             ],
             [
-                'title' => 'Helldivers 2',
-                'description' => '<p>Tham gia Lực lượng Helldivers, chiến đấu vì Siêu Trái Đất và lan tỏa Dân chủ khắp thiên hà trong tựa game bắn súng co-op bùng nổ nhất năm.</p>',
-                'price' => 850000,
-                'sale_price' => null, 
-                'developer' => 'Arrowhead Game Studios',
-                'trailer_link' => 'https://www.youtube.com/embed/csFBtHdsL04',
-                'is_featured' => 1,
-                'release_date' => Carbon::now()->subMonths(1),
+                'title' => 'Marvel\'s Spider-Man 2',
+                'description' => '<p>Đu tơ qua thành phố New York rộng lớn cùng cả Peter Parker và Miles Morales. Đối đầu với những kẻ thù truyền kiếp như Venom và Kraven.</p>',
+                'price' => 1490000,
+                'sale_price' => null,
+                'developer' => 'Insomniac Games',
+                'image' => 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2651280/header.jpg',
+                'screenshots' => [
+                    'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200',
+                    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200',
+                ],
+                'trailer_link' => 'bgqGdajvEHQ',
             ],
-            [
-                'title' => 'Palworld',
-                'description' => '<p>Game sinh tồn thế giới mở cực cuốn. Thu thập những sinh vật bí ẩn gọi là "Pal", xây dựng căn cứ, chế tạo súng đạn và khám phá thế giới.</p>',
-                'price' => 450000,
-                'sale_price' => 390000, 
-                'developer' => 'Pocketpair',
-                'trailer_link' => 'https://www.youtube.com/embed/4GjA_FWeA78',
-                'is_featured' => 0,
-                'release_date' => Carbon::now()->subMonths(2),
-            ],
+            
         ];
 
-        foreach ($games as $game) {
+        // Xóa sạch dữ liệu cũ trong bảng games để làm lại từ đầu cho sạch sẽ
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+        Game::truncate();
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
+        foreach ($games as $index => $game) {
             Game::create([
                 'title' => $game['title'],
                 'slug' => Str::slug($game['title']),
@@ -193,15 +252,15 @@ class GameSeeder extends Seeder
                 'price' => $game['price'],
                 'sale_price' => $game['sale_price'],
                 'developer' => $game['developer'],
-                'requirements' => '{"os":"Windows 10 64-bit","cpu":"Core i5-11400H","ram":"16GB","gpu":"RTX 3050"}', // Lấy cấu hình laptop của ba nhét vô luôn cho ngầu :))
-                'image' => null, // Mình sẽ úp ảnh bằng tay trong Admin sau
-                'screenshots' => json_encode([]), 
+                'requirements' => $requirements, // Truyền thẳng mảng vô
+                'image' => $game['image'],
+                'screenshots' => $game['screenshots'], // Truyền thẳng mảng vô
                 'trailer_link' => $game['trailer_link'],
-                'category_id' => $categoryIds[array_rand($categoryIds)], // Random một danh mục bất kỳ
+                'category_id' => $categoryIds[array_rand($categoryIds)],
                 'is_active' => 1,
-                'is_featured' => $game['is_featured'],
-                'views' => rand(100, 5000), // Cho lượt view ngẫu nhiên
-                'release_date' => $game['release_date'],
+                'is_featured' => 1,
+                'views' => rand(100, 5000),
+                'release_date' => $game['release_date'] ?? Carbon::now()->subMonths($index * 2),
             ]);
         }
     }

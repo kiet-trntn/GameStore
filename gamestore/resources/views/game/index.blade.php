@@ -1,3 +1,7 @@
+
+
+{{-- Đưa cái biến $imageUrl vô thẻ img --}}
+
 @extends('layouts.user')
 
 @section('content')
@@ -39,14 +43,22 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             @forelse($topSellingGames as $index => $topGame)
+            @php
+                // Bẫy nhận diện ảnh: Link mạng (Seeder) vs Ảnh máy (Admin up)
+                $topGameUrl = $topGame->image 
+                    ? (str_starts_with($topGame->image, 'http') ? $topGame->image : asset('storage/' . $topGame->image)) 
+                    : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300';
+            @endphp
+
             <a href="{{ route('game.detail', $topGame->slug) }}" class="group flex items-center gap-6 glass p-2 rounded-[2rem] border-white/5 hover:border-blue-500/30 transition-all duration-500">
                 <div class="relative w-32 h-40 flex-shrink-0 overflow-hidden rounded-[1.5rem]">
-                    <img src="{{ $topGame->image ? asset('storage/' . $topGame->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300' }}" 
+                    {{-- Đã cập nhật src thành biến $topGameUrl --}}
+                    <img src="{{ $topGameUrl }}" 
                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $topGame->title }}">
                     <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                     
-                    {{-- Logic vẽ số thứ tự (Top 1 màu xanh, Top 2-4 màu kính) --}}
-                    <div class="absolute -top-2 -left-2 w-12 h-12 {{ $index == 0 ? 'bg-blue-600' : 'bg-white/10 backdrop-blur-xl border border-white/10' }} rounded-2xl flex items-center justify-center shadow-xl rotate-[-12deg] group-hover:rotate-0 transition-transform">
+                    {{-- Logic vẽ số thứ tự --}}
+                    <div class="absolute -top-2 -left-2 w-12 h-12 {{ $index == 0 ? 'bg-blue-600' : 'bg-white/10 backdrop-blur-xl border border-white/10' }} rounded-2xl flex items-center justify-center shadow-xl rotate-[-12deg] group-hover:rotate-0 transition-transform z-10">
                         <span class="text-2xl font-black text-white italic">{{ $index + 1 }}</span>
                     </div>
                 </div>
@@ -55,7 +67,6 @@
                     <div class="flex items-center gap-2 mb-2">
                         <span class="text-[10px] font-bold {{ $index == 0 ? 'text-blue-400' : 'text-gray-400' }} uppercase tracking-widest">{{ $topGame->category->name ?? 'Gaming' }}</span>
                         
-                        {{-- Chỉ đánh sao cho Top 1 --}}
                         @if($index == 0)
                         <div class="flex text-yellow-500 text-[8px]">
                             ★★★★★
@@ -63,23 +74,21 @@
                         @endif
                     </div>
                     
-                    <h3 class="text-xl font-black text-white group-hover:text-blue-400 transition-colors mb-2 leading-tight line-clamp-2">{{ $topGame->title }}</h3>
+                    <h3 class="text-xl font-black text-white group-hover:text-blue-400 transition-colors mb-2 leading-tight line-clamp-2 italic">{{ $topGame->title }}</h3>
                     
                     <div class="flex items-center justify-between">
-                        {{-- Hiển thị giá --}}
                         @if($topGame->sale_price)
                             <span class="text-lg font-black text-white">{{ number_format($topGame->sale_price, 0, ',', '.') }}₫</span>
                         @else
                             <span class="text-lg font-black text-white">{{ number_format($topGame->price, 0, ',', '.') }}₫</span>
                         @endif
                         
-                        {{-- Lượt mua giả lập (Lấy Lượt xem làm lượt mua luôn cho oai) --}}
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">{{ number_format($topGame->views) }} lượt xem</span>
                     </div>
                 </div>
             </a>
             @empty
-                <div class="col-span-full text-gray-500 italic">Hệ thống đang cập nhật danh sách...</div>
+                <div class="col-span-full text-gray-500 italic p-10 text-center glass rounded-3xl border-dashed border-white/10">Hệ thống đang cập nhật danh sách...</div>
             @endforelse
     
         </div>

@@ -69,8 +69,10 @@
                         </div>
                         <div class="mb-4">
                             <label class="block text-sm font-semibold text-gray-700 mb-1">Ngày ra mắt (Dự kiến)</label>
-                            <input type="date" name="release_date" value="{{ old('release_date', $game->release_date ?? '') }}" 
-                                   class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            {{-- Sửa lại value: Chuyển format về Y-m-d để input date nhận diện được --}}
+                            <input type="date" name="release_date" 
+                                value="{{ old('release_date', $game->release_date ? \Carbon\Carbon::parse($game->release_date)->format('Y-m-d') : '') }}" 
+                                class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1 text-green-600">Giá khuyến mãi</label>
@@ -78,49 +80,37 @@
                                 class="w-full bg-green-50 border border-green-100 rounded-xl p-3 focus:bg-white focus:ring-2 focus:ring-green-500 outline-none transition">
                         </div>
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cấu hình yêu cầu</label>
-                            <textarea name="requirements" rows="3" 
-                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition">{{ old('requirements', $game->requirements) }}</textarea>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cấu hình yêu cầu (Định dạng JSON)</label>
+                            
+                            @php
+                                // Ép cái mảng requirements thành chuỗi JSON, sắp xếp thụt lề cho đẹp mắt (JSON_PRETTY_PRINT)
+                                $reqs = old('requirements', $game->requirements);
+                                $reqsString = is_array($reqs) ? json_encode($reqs, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : $reqs;
+                            @endphp
+                            
+                            {{-- Thêm class font-mono để font chữ hiển thị giống trình soạn thảo code --}}
+                            <textarea name="requirements" rows="6" 
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition font-mono text-sm">{{ $reqsString }}</textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ files: [] }">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-bold text-gray-700"><i class="fas fa-images text-purple-500 mr-2"></i>Bộ sưu tập ảnh</h2>
-                        <span class="text-[10px] text-gray-400 italic">Chọn ảnh mới sẽ thay thế bộ ảnh cũ</span>
-                    </div>
 
-                    @if($game->screenshots)
-                    <div class="grid grid-cols-5 gap-2 mb-4 p-2 bg-gray-50 rounded-xl border border-gray-100">
-                        @foreach($game->screenshots as $ss)
-                            <img src="{{ asset('storage/' . $ss) }}" class="h-16 w-full object-cover rounded-lg">
-                        @endforeach
-                    </div>
-                    @endif
-                    
-                    <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center relative hover:border-indigo-300 hover:bg-indigo-50/30 transition group">
-                        <input type="file" name="screenshots[]" multiple @change="files = Array.from($event.target.files)" class="absolute inset-0 opacity-0 cursor-pointer">
-                        <div class="text-gray-400 group-hover:text-indigo-500 transition">
-                            <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
-                            <p class="text-sm font-medium">Kéo thả hoặc Click để thay đổi bộ sưu tập ảnh</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-3 mt-4" x-show="files.length > 0">
-                        <template x-for="file in files">
-                            <div class="relative">
-                                <img :src="URL.createObjectURL(file)" class="w-full h-24 object-cover rounded-xl border-2 border-indigo-500">
-                                <span class="absolute top-1 left-1 bg-indigo-500 text-white text-[8px] px-1.5 rounded-full uppercase font-bold">Mới</span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
             </div>
 
+            {{-- Cột bên phải: Chứa Ảnh và Trailer --}}
             <div class="space-y-6">
                 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ imageUrl: '{{ $game->image ? asset('storage/' . $game->image) : null }}' }">
+                {{-- KHU VỰC ẢNH BÌA ĐẠI DIỆN --}}
+                @php
+                    // Bẫy phân biệt ảnh Steam (mạng) và ảnh tự up (máy) cho Ảnh Bìa
+                    $coverUrl = null;
+                    if ($game->image) {
+                        $coverUrl = str_starts_with($game->image, 'http') ? $game->image : asset('storage/' . $game->image);
+                    }
+                @endphp
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ imageUrl: '{{ $coverUrl }}' }">
                     <h2 class="font-bold text-gray-700 mb-4">Ảnh bìa đại diện</h2>
                     
                     <div class="relative w-full aspect-video bg-gray-100 rounded-2xl overflow-hidden mb-4 border border-gray-100 shadow-inner group">
@@ -145,6 +135,52 @@
                     @error('image') <p class="text-red-500 text-xs mt-2 italic">{{ $message }}</p> @enderror
                 </div>
 
+                {{-- KHU VỰC BỘ SƯU TẬP ẢNH (SCREENSHOTS) --}}
+                @php
+                    // Ép kiểu an toàn cho mảng Screenshots
+                    $rawScreenshots = $game->screenshots;
+                    $safeScreenshots = is_string($rawScreenshots) ? json_decode($rawScreenshots, true) : $rawScreenshots;
+                    $safeScreenshots = is_array($safeScreenshots) ? array_filter($safeScreenshots) : [];
+                @endphp
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ files: [] }">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-gray-700"><i class="fas fa-images text-purple-500 mr-2"></i>Bộ sưu tập ảnh</h2>
+                        <span class="text-[10px] text-gray-400 italic">Chọn ảnh mới sẽ thay thế bộ ảnh cũ</span>
+                    </div>
+
+                    @if(count($safeScreenshots) > 0)
+                    <div class="grid grid-cols-5 gap-2 mb-4 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                        @foreach($safeScreenshots as $ss)
+                            @php
+                                // Bẫy phân biệt ảnh mạng và ảnh tự up cho từng tấm Screenshot
+                                $ssUrl = str_starts_with($ss, 'http') ? $ss : asset('storage/' . $ss);
+                            @endphp
+                            <img src="{{ $ssUrl }}" class="h-16 w-full object-cover rounded-lg shadow-sm border border-gray-200">
+                        @endforeach
+                    </div>
+                    @endif
+                    
+                    <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center relative hover:border-indigo-300 hover:bg-indigo-50/30 transition group">
+                        <input type="file" name="screenshots[]" multiple @change="files = Array.from($event.target.files)" class="absolute inset-0 opacity-0 cursor-pointer">
+                        <div class="text-gray-400 group-hover:text-indigo-500 transition">
+                            <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
+                            <p class="text-sm font-medium">Kéo thả hoặc Click để thay đổi bộ sưu tập ảnh</p>
+                        </div>
+                    </div>
+
+                    {{-- Khung xem trước ảnh mới chọn (Dùng AlpineJS) --}}
+                    <div class="grid grid-cols-4 gap-3 mt-4" x-show="files.length > 0">
+                        <template x-for="file in files">
+                            <div class="relative">
+                                <img :src="URL.createObjectURL(file)" class="w-full h-24 object-cover rounded-xl border-2 border-indigo-500 shadow-sm">
+                                <span class="absolute top-1 left-1 bg-indigo-500 text-white text-[8px] px-1.5 rounded-full uppercase font-bold">Mới</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- KHU VỰC TRAILER & BUTTON CẬP NHẬT --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Trailer URL</h2>
                     <div class="relative">

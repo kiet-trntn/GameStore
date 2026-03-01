@@ -84,8 +84,18 @@
                     <td class="px-6 py-4">
                         <div class="flex justify-center">
                             <div class="w-16 h-10 rounded-lg overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
+                                @php
+                                // Kiểm tra: Nếu link ảnh bắt đầu bằng chữ 'http' thì xài luôn.
+                                // Nếu không có chữ 'http' (ảnh tự up) thì mới gắn hàm asset('storage/...') vô.
+                                // Nếu game chưa có ảnh thì lấy đại 1 cái ảnh mặc định.
+                                if ($game->image) {
+                                    $imageUrl = str_starts_with($game->image, 'http') ? $game->image : asset('storage/' . $game->image);
+                                } else {
+                                    $imageUrl = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800'; // Ảnh dự phòng
+                                }
+                                @endphp
                                 @if($game->image)
-                                    <img src="{{ asset('storage/' . $game->image) }}" class="w-full h-full object-cover">
+                                    <img src="{{ $imageUrl }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="flex items-center justify-center h-full text-[10px] text-gray-300">No Pic</div>
                                 @endif

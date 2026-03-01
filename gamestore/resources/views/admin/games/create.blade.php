@@ -87,31 +87,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ files: [] }">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="font-bold text-gray-700"><i class="fas fa-images text-purple-500 mr-2"></i>Bộ sưu tập ảnh</h2>
-                    </div>
-                    
-                    <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center relative hover:border-indigo-300 hover:bg-indigo-50/30 transition group">
-                        <input type="file" name="screenshots[]" multiple @change="files = Array.from($event.target.files)" class="absolute inset-0 opacity-0 cursor-pointer">
-                        <div class="text-gray-400 group-hover:text-indigo-500 transition">
-                            <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
-                            <p class="text-sm font-medium">Kéo thả hoặc Click để chọn ảnh chi tiết</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-3 mt-4" x-show="files.length > 0">
-                        <template x-for="file in files">
-                            <div class="relative">
-                                <img :src="URL.createObjectURL(file)" class="w-full h-24 object-cover rounded-xl border border-gray-100 shadow-sm">
-                            </div>
-                        </template>
-                    </div>
-                </div>
             </div>
 
+            {{-- Cột bên phải: Chứa Ảnh và Trailer --}}
             <div class="space-y-6">
                 
+                {{-- KHU VỰC ẢNH BÌA ĐẠI DIỆN --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ imageUrl: null }">
                     <h2 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Ảnh bìa đại diện</h2>
                     
@@ -122,39 +103,69 @@
                         <template x-if="!imageUrl">
                             <div class="flex flex-col items-center justify-center h-full text-gray-300">
                                 <i class="fas fa-image text-4xl mb-2"></i>
-                                <p class="text-xs">Chưa chọn ảnh</p>
+                                <p class="text-xs mt-2 font-medium">Chưa chọn ảnh bìa</p>
                             </div>
                         </template>
                     </div>
 
                     <div class="relative">
-                        <input type="file" name="image" id="imageInput" class="hidden" 
+                        <input type="file" name="image" id="imageInput" class="hidden" accept="image/*"
                             @change="const file = $event.target.files[0]; if (file) imageUrl = URL.createObjectURL(file)">
-                        <label for="imageInput" class="w-full flex items-center justify-center px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-semibold text-sm cursor-pointer hover:bg-indigo-100 transition border border-indigo-100">
-                            <i class="fas fa-camera mr-2"></i> Chọn ảnh bìa
+                        <label for="imageInput" class="w-full flex items-center justify-center px-4 py-3 bg-indigo-50 text-indigo-700 rounded-xl font-semibold text-sm cursor-pointer hover:bg-indigo-100 transition border border-indigo-100 shadow-sm">
+                            <i class="fas fa-camera mr-2"></i> Chọn ảnh bìa mới
                         </label>
                     </div>
-                    @error('image') <p class="text-red-500 text-xs mt-2 italic">{{ $message }}</p> @enderror
+                    @error('image') <p class="text-red-500 text-xs mt-2 italic font-medium">{{ $message }}</p> @enderror
                 </div>
 
+                {{-- KHU VỰC BỘ SƯU TẬP ẢNH (SCREENSHOTS) --}}
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100" x-data="{ files: [] }">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-bold text-gray-700"><i class="fas fa-images text-purple-500 mr-2"></i>Bộ sưu tập ảnh</h2>
+                    </div>
+                    
+                    <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center relative hover:border-indigo-300 hover:bg-indigo-50/30 transition group cursor-pointer">
+                        <input type="file" name="screenshots[]" multiple accept="image/*" 
+                               @change="files = Array.from($event.target.files)" 
+                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                        <div class="text-gray-400 group-hover:text-indigo-500 transition relative z-0">
+                            <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
+                            <p class="text-sm font-medium">Kéo thả hoặc Click để chọn ảnh chi tiết</p>
+                            <p class="text-[10px] mt-1 italic text-gray-400">Có thể chọn nhiều ảnh cùng lúc</p>
+                        </div>
+                    </div>
+
+                    {{-- Khung hiển thị trước danh sách ảnh mới chọn --}}
+                    <div class="grid grid-cols-4 gap-3 mt-4" x-show="files.length > 0">
+                        <template x-for="(file, index) in files" :key="index">
+                            <div class="relative group rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                                <img :src="URL.createObjectURL(file)" class="w-full h-20 object-cover">
+                                <span class="absolute top-1 left-1 bg-indigo-500/90 text-white text-[9px] px-1.5 py-0.5 rounded-full uppercase font-bold shadow-sm" x-text="'Ảnh ' + (index + 1)"></span>
+                            </div>
+                        </template>
+                    </div>
+                    @error('screenshots') <p class="text-red-500 text-xs mt-2 italic font-medium">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- KHU VỰC TRAILER & BUTTON LƯU --}}
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Trailer URL</h2>
+                    <h2 class="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wider">Trailer URL (YouTube)</h2>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-red-500">
-                            <i class="fab fa-youtube"></i>
+                            <i class="fab fa-youtube text-lg"></i>
                         </span>
-                        <input type="text" name="trailer_link" value="{{ old('trailer_link') }}" placeholder="https://youtube.com/..."
-                            class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-red-500 outline-none transition">
+                        <input type="text" name="trailer_link" value="{{ old('trailer_link') }}" placeholder="Ví dụ: dQw4w9WgXcQ"
+                            class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-red-500 outline-none transition">
                     </div>
-                    @error('trailer_link') <p class="text-red-500 text-xs mt-2 italic">{{ $message }}</p> @enderror
+                    @error('trailer_link') <p class="text-red-500 text-xs mt-2 italic font-medium">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="space-y-3">
-                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 transition duration-200 uppercase tracking-widest text-sm">
-                        Lưu Game Mới
+                <div class="space-y-3 pt-2">
+                    <button type="submit" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:-translate-y-0.5 transition duration-200 uppercase tracking-widest text-sm">
+                        <i class="fas fa-save"></i> Lưu Game Mới
                     </button>
                     <a href="{{ route('admin.games.index') }}" class="w-full flex items-center justify-center bg-white text-gray-500 font-semibold py-3 rounded-2xl border border-gray-100 hover:bg-gray-50 hover:text-red-500 transition">
-                        Hủy bỏ & Quay lại
+                        <i class="fas fa-times mr-2"></i> Hủy bỏ & Quay lại
                     </a>
                 </div>
             </div>

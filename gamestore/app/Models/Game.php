@@ -19,7 +19,8 @@ class Game extends Model
 
     protected $casts = [
         'screenshots' => 'array', // Tự động convert JSON <-> Array
-        'release_date' => 'date',
+        'requirements' => 'array',
+        'release_date' => 'datetime',
     ];
 
     // Quan hệ: Một Game thuộc về một Danh mục

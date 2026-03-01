@@ -138,7 +138,8 @@ class GameController extends Controller
         $game->price = $request->price;
         $game->sale_price = $request->sale_price;
         $game->developer = $request->developer;
-        $game->requirements = $request->requirements;
+        $game->release_date = $request->release_date; // Ép cái này về đúng tên input trong Blade
+        $game->requirements = json_decode($request->requirements, true); // Dịch cái chữ từ textarea thành mảng để lưu
         $game->description = $request->description;
         $game->trailer_link = $request->trailer_link;
         $game->category_id = $request->category_id;

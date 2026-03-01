@@ -1,3 +1,4 @@
+
 @extends('layouts.user')
 
 @section('content')
@@ -8,15 +9,24 @@
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-20">
         {{-- Ảnh đại diện to --}}
         <div class="lg:col-span-7">
+            @php
+                // Bẫy phân biệt ảnh Steam (mạng) và ảnh tự up (máy)
+                $heroUrl = $game->image 
+                    ? (str_starts_with($game->image, 'http') ? $game->image : asset('storage/' . $game->image)) 
+                    : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200';
+            @endphp
+
             <div class="relative group rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl aspect-video">
-                <img src="{{ $game->image ? asset('storage/' . $game->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200' }}" 
+                <img src="{{ $heroUrl }}" 
                      class="w-full h-full object-cover transition duration-700 group-hover:scale-105" alt="{{ $game->title }}">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0f]/60 to-transparent"></div>
                 
                 {{-- Nút Play Trailer (Chỉ hiện nếu có link Youtube) --}}
                 @if($game->trailer_link)
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <a href="{{ $game->trailer_link }}" target="_blank" class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-blue-500/50 hover:scale-110 transition-transform">
+                    {{-- Chỉnh sửa lại href cho nút Play nó gọi Youtube thay vì link bậy bạ --}}
+                    <a href="https://www.youtube.com/watch?v={{ $game->trailer_link }}" target="_blank" 
+                       class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-blue-500/50 hover:scale-110 transition-transform cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </a>
                 </div>
@@ -28,7 +38,7 @@
         <div class="lg:col-span-5 flex flex-col justify-center">
             <div class="flex items-center gap-3 mb-6">
                 <span class="bg-blue-600/20 text-blue-400 text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest border border-blue-400/20">
-                    {{ $game->category->name }}
+                    {{ $game->category->name ?? 'CHƯA PHÂN LOẠI' }}
                 </span>
                 <span class="text-gray-500 text-xs font-bold uppercase tracking-widest italic flex items-center gap-2">
                     <i class="fas fa-eye"></i> {{ number_format($game->views) }} Lượt Xem
@@ -49,7 +59,6 @@
                         <span class="text-4xl font-black text-white tracking-tighter">{{ number_format($game->sale_price, 0, ',', '.') }}đ</span>
                         <span class="text-lg text-gray-500 line-through mb-1 font-bold">{{ number_format($game->price, 0, ',', '.') }}đ</span>
                         @php
-                            // Tự động tính phần trăm giảm giá
                             $percent = round((($game->price - $game->sale_price) / $game->price) * 100);
                         @endphp
                         <span class="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded-md mb-2">-{{ $percent }}%</span>
@@ -69,26 +78,47 @@
     </section>
 
     {{-- PHẦN 2: BỘ SƯU TẬP ẢNH (SCREENSHOTS) --}}
-    @if($game->screenshots && count($game->screenshots) > 0)
+    @php
+        // BƯỚC 1: DỌN DẸP DỮ LIỆU AN TOÀN 100%
+        $rawScreenshots = $game->screenshots;
+        
+        // Nếu nó đang là chuỗi JSON thì tự dịch ra mảng, còn không thì lấy nguyên xi
+        $safeScreenshots = is_string($rawScreenshots) ? json_decode($rawScreenshots, true) : $rawScreenshots;
+        
+        // Lỡ nó bị null thì ép về mảng rỗng để hàm count() không bị văng lỗi
+        $safeScreenshots = is_array($safeScreenshots) ? array_filter($safeScreenshots) : [];
+    @endphp
+
+    {{-- BƯỚC 2: HIỂN THỊ GIAO DIỆN KHI ĐÃ CHẮC CHẮN CÓ MẢNG ẢNH --}}
+    @if(count($safeScreenshots) > 0)
     <div class="mb-20">
         <div class="flex items-center gap-4 mb-8">
             <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
             <h2 class="text-xl font-black text-white uppercase italic tracking-widest">Ảnh thực tế in-game</h2>
         </div>
+        
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {{-- Lặp mảng hình ảnh lưu trong DB, lấy tối đa 4 hình --}}
-            @foreach(array_slice($game->screenshots, 0, 4) as $key => $imagePath)
-                @if($key == 3 && count($game->screenshots) > 4)
-                    {{-- Hình thứ 4 nếu còn dư ảnh thì làm hiệu ứng làm mờ +12 ẢNH --}}
+            {{-- Dùng biến $safeScreenshots đã được làm sạch sẽ --}}
+            @foreach(array_slice($safeScreenshots, 0, 4) as $key => $imagePath)
+                
+                @php
+                    // Bẫy lỗi phụ: Lỡ trong mảng có 1 đường dẫn rỗng thì bỏ qua luôn
+                    if(empty($imagePath)) continue;
+                    $ssUrl = str_starts_with($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath);
+                @endphp
+
+                @if($key == 3 && count($safeScreenshots) > 4)
+                    {{-- Hình thứ 4 nếu còn dư ảnh thì làm hiệu ứng làm mờ +X ẢNH --}}
                     <div class="aspect-video rounded-3xl overflow-hidden border border-white/10 relative cursor-pointer group">
-                        <img src="{{ asset('storage/' . $imagePath) }}" class="w-full h-full object-cover opacity-40 transition duration-700 group-hover:scale-110">
-                        <div class="absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-widest text-white">
-                            +{{ count($game->screenshots) - 3 }} ẢNH
+                        <img loading="lazy" src="{{ $ssUrl }}" class="w-full h-full object-cover opacity-40 transition duration-700 group-hover:scale-110">
+                        <div class="absolute inset-0 flex items-center justify-center text-xl md:text-2xl font-black uppercase tracking-widest text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]">
+                            +{{ count($safeScreenshots) - 3 }} ẢNH
                         </div>
                     </div>
                 @else
-                    <div class="aspect-video rounded-3xl overflow-hidden border border-white/10 cursor-zoom-in">
-                        <img src="{{ asset('storage/' . $imagePath) }}" class="w-full h-full object-cover hover:scale-110 transition duration-700">
+                    {{-- 3 Hình đầu tiên hiển thị bình thường --}}
+                    <div class="aspect-video rounded-3xl overflow-hidden border border-white/10 cursor-zoom-in group">
+                        <img loading="lazy" src="{{ $ssUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                     </div>
                 @endif
             @endforeach
@@ -102,7 +132,7 @@
         <div class="lg:col-span-7">
             <h3 class="text-2xl font-black text-white uppercase italic tracking-tight mb-8">Mô tả <span class="text-blue-500 underline decoration-2 underline-offset-8">chi tiết</span></h3>
             <div class="text-gray-300 leading-relaxed space-y-4 text-sm md:text-base font-medium prose prose-invert">
-                {!! nl2br(e($game->description)) !!}
+                {!! $game->description !!}
             </div>
         </div>
 
@@ -112,8 +142,34 @@
                 <div class="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-[60px] rounded-full"></div>
                 <h3 class="text-xl font-black text-white uppercase italic tracking-tight mb-8">Cấu hình <span class="text-blue-500">Yêu cầu</span></h3>
                 
-                <div class="text-sm text-gray-300 whitespace-pre-line leading-loose">
-                    {{ $game->requirements ?? 'Đang cập nhật thông tin cấu hình...' }}
+                <div class="text-sm text-gray-300 leading-loose relative z-10">
+                    {{-- Ép kiểu an toàn 100% để chống văng lỗi Array to String --}}
+                    @php
+                        $reqs = is_string($game->requirements) ? json_decode($game->requirements, true) : $game->requirements;
+                    @endphp
+                    
+                    @if(is_array($reqs) && count($reqs) > 0)
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-4 border-b border-white/5 pb-3">
+                                <span class="text-gray-500 font-bold w-12 uppercase tracking-widest text-[10px]">OS</span>
+                                <span class="font-medium text-white">{{ $reqs['os'] ?? 'Đang cập nhật' }}</span>
+                            </li>
+                            <li class="flex items-center gap-4 border-b border-white/5 pb-3">
+                                <span class="text-gray-500 font-bold w-12 uppercase tracking-widest text-[10px]">CPU</span>
+                                <span class="font-medium text-blue-400">{{ $reqs['cpu'] ?? 'Đang cập nhật' }}</span>
+                            </li>
+                            <li class="flex items-center gap-4 border-b border-white/5 pb-3">
+                                <span class="text-gray-500 font-bold w-12 uppercase tracking-widest text-[10px]">RAM</span>
+                                <span class="font-medium text-white">{{ $reqs['ram'] ?? 'Đang cập nhật' }}</span>
+                            </li>
+                            <li class="flex items-center gap-4 pb-1">
+                                <span class="text-gray-500 font-bold w-12 uppercase tracking-widest text-[10px]">GPU</span>
+                                <span class="font-medium text-yellow-500">{{ $reqs['gpu'] ?? 'Đang cập nhật' }}</span>
+                            </li>
+                        </ul>
+                    @else
+                        <p class="text-gray-500 italic">Đang cập nhật thông tin cấu hình...</p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -234,21 +290,36 @@
     <section>
         <div class="flex items-center justify-between mb-10">
             <h3 class="text-2xl font-black text-white uppercase italic tracking-tighter">Có thể bạn <span class="text-blue-500">cũng thích</span></h3>
-            <a href="{{ route('game', ['category' => $game->category->slug]) }}" class="text-xs font-black text-gray-500 uppercase tracking-widest hover:text-white transition">Xem danh mục →</a>
+            <a href="{{ route('game', ['category' => $game->category->slug ?? 'all']) }}" class="text-xs font-black text-gray-500 uppercase tracking-widest hover:text-white transition">Xem danh mục →</a>
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($relatedGames as $related)
-            <a href="{{ route('game.detail', $related->slug) }}" class="group glass p-3 rounded-[2rem] border-white/5 hover:border-blue-500/30 transition-all duration-500 bg-white/5">
-                <div class="aspect-[3/4] rounded-3xl overflow-hidden mb-4 relative">
-                    <img src="{{ $related->image ? asset('storage/' . $related->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400' }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0f] via-transparent to-transparent opacity-80"></div>
-                </div>
-                <div class="px-2 pb-2 text-center">
-                    <h4 class="font-bold text-white group-hover:text-blue-400 transition-colors truncate mb-1">{{ $related->title }}</h4>
-                    <span class="text-blue-400 font-black tracking-tighter">{{ number_format($related->sale_price ?? $related->price, 0, ',', '.') }}₫</span>
-                </div>
-            </a>
+                @php
+                    // Bẫy ảnh đơn giản: Ưu tiên link http (từ Seeder), sau đó tới storage (Admin up)
+                    $relatedUrl = $related->image 
+                        ? (str_starts_with($related->image, 'http') ? $related->image : asset('storage/' . $related->image)) 
+                        : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400';
+                @endphp
+
+                <a href="{{ route('game.detail', $related->slug) }}" class="group glass p-3 rounded-[2rem] border-white/5 hover:border-blue-500/30 transition-all duration-500 bg-white/5">
+                    <div class="aspect-[3/4] rounded-3xl overflow-hidden mb-4 relative">
+                        {{-- Đã cập nhật src --}}
+                        <img loading="lazy" src="{{ $relatedUrl }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="{{ $related->title }}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d0f] via-transparent to-transparent opacity-80"></div>
+                    </div>
+                    <div class="px-2 pb-2 text-center">
+                        <h4 class="font-bold text-white group-hover:text-blue-400 transition-colors truncate mb-1 italic uppercase tracking-tight text-sm">{{ $related->title }}</h4>
+                        <div class="flex flex-col items-center">
+                            @if($related->sale_price)
+                                <span class="text-blue-400 font-black tracking-tighter">{{ number_format($related->sale_price, 0, ',', '.') }}₫</span>
+                                <span class="text-[10px] text-gray-500 line-through">{{ number_format($related->price, 0, ',', '.') }}₫</span>
+                            @else
+                                <span class="text-blue-400 font-black tracking-tighter">{{ number_format($related->price, 0, ',', '.') }}₫</span>
+                            @endif
+                        </div>
+                    </div>
+                </a>
             @endforeach
         </div>
     </section>
