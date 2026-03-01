@@ -367,69 +367,57 @@
     
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
+            @if($featuredPost)
             <div class="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl h-[500px]">
-                <img loading="lazy" src="https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover transition-transform transform-gpu will-change-transform duration-1000 group-hover:scale-105">
+                <img loading="lazy" src="{{ asset('storage/' . $featuredPost->image) }}" class="absolute inset-0 w-full h-full object-cover ...">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/40 to-transparent"></div>
                 
                 <div class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
                     <div class="flex items-center gap-4 mb-4">
-                        <span class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-white">Sự kiện</span>
-                        <span class="text-gray-400 text-xs font-bold italic">03 Tháng 2, 2026</span>
+                        <span class="bg-blue-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-white">
+                            {{ $featuredPost->category }}
+                        </span>
+                        <span class="text-gray-400 text-xs font-bold italic">{{ $featuredPost->created_at->format('d/m/Y') }}</span>
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-black text-white mb-4 leading-tight group-hover:text-blue-400 transition-colors">
-                        Lễ trao giải Game of the Year 2026: Những ứng cử viên sáng giá nhất đã lộ diện
+                    <h3 class="text-3xl md:text-4xl font-black text-white mb-4 leading-tight ...">
+                        {{ $featuredPost->title }}
                     </h3>
                     <p class="text-gray-400 text-sm md:text-base line-clamp-2 max-w-2xl mb-6">
-                        Đêm vinh danh những siêu phẩm ngành game sắp bắt đầu. Cùng điểm qua danh sách những tựa game đang dẫn đầu cuộc đua năm nay...
+                        {{ $featuredPost->summary }}
                     </p>
-                    <div class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
+                    <a href="{{ route('post.detail', $featuredPost->slug) }}" class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
                         Đọc tiếp <span>→</span>
-                    </div>
+                    </a>
                 </div>
             </div>
+            @endif
     
             <div class="lg:col-span-5 flex flex-col gap-6">
-                
-                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
-                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img loading="lazy" src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <span class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cập nhật</span>
-                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
-                            Bản cập nhật 2.0 của Cyber Strike: Thêm hệ thống Ray-tracing thế hệ mới
-                        </h4>
-                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">1 giờ trước</p>
-                    </div>
-                </a>
-    
-                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
-                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img loading="lazy" src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <span class="text-purple-500 text-[10px] font-bold uppercase tracking-widest mb-1">Phần cứng</span>
-                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
-                            Lộ diện console thế hệ tiếp theo: Hiệu năng gấp đôi, hỗ trợ 8K Native
-                        </h4>
-                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">5 giờ trước</p>
-                    </div>
-                </a>
-    
-                <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
-                    <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                        <img loading="lazy" src="https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?auto=format&fit=crop&w=300" class="w-full h-full object-cover group-hover:scale-110 transition-transform transform-gpu will-change-transform">
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <span class="text-green-500 text-[10px] font-bold uppercase tracking-widest mb-1">Cộng đồng</span>
-                        <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
-                            Giải đấu E-Sports quốc tế sắp sửa đổ bộ vào Việt Nam vào mùa hè này
-                        </h4>
-                        <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">Hôm qua</p>
-                    </div>
-                </a>
-    
+                @forelse($recentPosts as $post)
+                    <a href="{{ route('post.detail', $post->slug) }}" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                        <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
+                            <img loading="lazy" src="{{ asset('storage/' . $post->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform ...">
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            {{-- Đổi màu tag theo category --}}
+                            @php
+                                $color = match($post->category) {
+                                    'Sự kiện' => 'text-blue-500',
+                                    'Phần cứng' => 'text-purple-500',
+                                    'Cộng đồng' => 'text-green-500',
+                                    default => 'text-orange-500'
+                                };
+                            @endphp
+                            <span class="{{ $color }} text-[10px] font-bold uppercase tracking-widest mb-1">{{ $post->category }}</span>
+                            <h4 class="text-sm font-bold text-white line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">
+                                {{ $post->title }}
+                            </h4>
+                            <p class="text-[10px] text-gray-500 mt-2 font-bold italic uppercase tracking-tighter">{{ $post->created_at->diffForHumans() }}</p>
+                        </div>
+                    </a>
+                @empty
+                    <p class="text-gray-500 italic">Chưa có tin tức nào.</p>
+                @endforelse
             </div>
         </div>
     </section>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Game;
+use App\Models\Post;
 
 class HomeController extends Controller
 {
@@ -52,6 +53,18 @@ class HomeController extends Controller
                                         ->take(3)
                                         ->get();
 
-        return view('home.index', compact('categories', 'hotGames', 'newGames', 'popularGames', 'upcomingGames'));
+        // Lấy 1 bài viết MỚI NHẤT và NỔI BẬT NHẤT (dành cho cái hình to đùng bên trái)
+        $featuredPost = Post::where('is_published', true)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+        // Lấy 3 bài viết tiếp theo (dành cho danh sách nhỏ bên phải)
+        $recentPosts = Post::where('is_published', true)
+                   ->where('id', '!=', $featuredPost->id ?? 0) // Loại trừ cái bài đã lên hình bự
+                   ->orderBy('created_at', 'desc')
+                   ->take(3)
+                   ->get();
+
+        return view('home.index', compact('categories', 'hotGames', 'newGames', 'popularGames', 'upcomingGames', 'featuredPost', 'recentPosts'));
     }
 }

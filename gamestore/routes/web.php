@@ -52,6 +52,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
     Route::delete('/reviews/{id}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
 
+    // QUẢN LÝ BÀI VIẾT (TIN TỨC)
+    Route::get('/posts', [App\Http\Controllers\Admin\PostController::class, 'index'])->name('posts.index');
+    Route::get('/posts/create', [App\Http\Controllers\Admin\PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [App\Http\Controllers\Admin\PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts/{id}/edit', [App\Http\Controllers\Admin\PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{id}', [App\Http\Controllers\Admin\PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{id}', [App\Http\Controllers\Admin\PostController::class, 'destroy'])->name('posts.destroy');
+
     // ROUTE QUẢN LÝ USER
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
