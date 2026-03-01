@@ -51,8 +51,17 @@
                         @foreach($order->items as $item)
                             <div class="flex items-center gap-5 bg-white/[0.02] p-4 rounded-2xl border border-white/5 hover:bg-white/5 transition-colors">
                                 {{-- Hình Game --}}
+                                @php
+                                    // Bẫy ảnh: Kiểm tra xem có game và có ảnh không
+                                    $itemImg = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200';
+                                    if ($item->game && $item->game->image) {
+                                        $itemImg = str_starts_with($item->game->image, 'http') 
+                                            ? $item->game->image 
+                                            : asset('storage/' . $item->game->image);
+                                    }
+                                @endphp
                                 <div class="w-20 h-24 flex-shrink-0 rounded-xl overflow-hidden shadow-lg">
-                                    <img src="{{ $item->game && $item->game->image ? asset('storage/' . $item->game->image) : 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=200' }}" 
+                                    <img src="{{ $itemImg }}" alt="{{ $item->game->title ?? 'Game Image' }}"
                                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                                 </div>
                                 

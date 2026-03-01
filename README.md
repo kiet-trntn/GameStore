@@ -17,3 +17,9 @@
 ## 🔑 Tài khoản Test
 - **Admin:** admin@gmail.com / Pass: 12345678
 - **User:** player1@gmail.com / Pass: 12345678
+## 🔑 Tài khoản Thanh toán
+- Chọn ngân hàng NCB
+- Số thẻ: 9704198526191432198
+- Tên in trên thẻ: NGUYEN VAN A
+- Ngày phát hành: 07/15
+- Mã OTP: 123456
