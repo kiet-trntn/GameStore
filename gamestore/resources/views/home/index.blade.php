@@ -385,7 +385,7 @@
                     <p class="text-gray-400 text-sm md:text-base line-clamp-2 max-w-2xl mb-6">
                         {{ $featuredPost->summary }}
                     </p>
-                    <a href="{{ route('post.detail', $featuredPost->slug) }}" class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
+                    <a href="#" class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
                         Đọc tiếp <span>→</span>
                     </a>
                 </div>
@@ -394,7 +394,7 @@
     
             <div class="lg:col-span-5 flex flex-col gap-6">
                 @forelse($recentPosts as $post)
-                    <a href="{{ route('post.detail', $post->slug) }}" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                    <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
                         <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
                             <img loading="lazy" src="{{ asset('storage/' . $post->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform ...">
                         </div>
