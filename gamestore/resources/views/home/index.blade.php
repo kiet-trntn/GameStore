@@ -237,7 +237,6 @@
                         <a href="{{ route('register') }}" class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-bold text-sm transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-blue-500/60">
                             Đăng ký ngay — Miễn phí 7 ngày
                         </a>
-                        <a href="#" class="text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Xem bảng giá</a>
                     </div>
                 </div>
     
