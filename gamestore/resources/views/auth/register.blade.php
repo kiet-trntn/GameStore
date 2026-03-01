@@ -117,7 +117,7 @@
 
                 <p class="mt-10 text-center text-sm text-gray-500">
                     Đã có tài khoản? 
-                    <a href="login.html" class="text-white font-bold hover:text-blue-500 transition-colors uppercase tracking-widest ml-1">Đăng nhập</a>
+                    <a href="{{ route('login') }}" class="text-white font-bold hover:text-blue-500 transition-colors uppercase tracking-widest ml-1">Đăng nhập</a>
                 </p>
             </div>
         </div>

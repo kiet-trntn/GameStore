@@ -121,7 +121,7 @@
 
                 <p class="mt-12 text-center text-sm text-gray-500">
                     Chưa có tài khoản? 
-                    <a href="#" class="text-white font-bold hover:text-blue-500 transition-colors uppercase tracking-widest ml-1">Đăng ký ngay</a>
+                    <a href="{{ route('register') }}" class="text-white font-bold hover:text-blue-500 transition-colors uppercase tracking-widest ml-1">Đăng ký ngay</a>
                 </p>
             </div>
         </div>

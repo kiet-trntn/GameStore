@@ -45,6 +45,10 @@ Route::post('/ho-so/doi-mat-khau', [ProfileController::class, 'updatePassword'])
 // ROUTE ĐÁNH GIÁ GAME
 Route::post('/game/{id}/review', [ReviewController::class, 'store'])->name('review.store')->middleware('auth');
 
+// TRANG TIN TỨC DÀNH CHO KHÁCH
+Route::get('/tin-tuc', [App\Http\Controllers\NewsController::class, 'index'])->name('news.index');
+Route::get('/tin-tuc/{slug}', [App\Http\Controllers\NewsController::class, 'show'])->name('news.show');
+
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -37,6 +37,10 @@
                 <a href="{{ route('admin.reviews.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/reviews*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">
                     Đánh giá
                 </a>
+
+                <a href="{{ route('admin.posts.index') }}" class="block py-2.5 px-4 rounded {{ Request::is('admin/posts*') ? 'bg-indigo-700' : 'hover:bg-indigo-800' }} transition">
+                    Bài viết
+                </a>
             
                 {{-- Vách ngăn cách điệu --}}
                 <div class="border-t border-indigo-500/30 my-4"></div>

@@ -233,9 +233,10 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row items-center gap-6">
-                        <button class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-bold text-sm transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-blue-500/60">
+                        {{-- Đổi <button> thành <a>, thêm href trỏ về route('register') và thêm class text-center --}}
+                        <a href="{{ route('register') }}" class="w-full sm:w-auto text-center bg-blue-600 hover:bg-blue-500 text-white px-10 py-4 rounded-2xl font-bold text-sm transition-all duration-300 shadow-[0_0_30px_rgba(37,99,235,0.4)] hover:shadow-blue-500/60">
                             Đăng ký ngay — Miễn phí 7 ngày
-                        </button>
+                        </a>
                         <a href="#" class="text-gray-500 hover:text-white text-xs font-bold uppercase tracking-widest transition-colors">Xem bảng giá</a>
                     </div>
                 </div>
@@ -362,14 +363,18 @@
                 <div class="w-1.5 h-8 bg-blue-600 rounded-full shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
                 <h2 class="text-3xl font-extrabold tracking-tight text-white uppercase italic">Tin tức <span class="text-gray-500 font-light">Mới nhất</span></h2>
             </div>
-            <button class="glass px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all">Tất cả bài viết</button>
+            {{-- Đổi button thành thẻ <a> trỏ sang trang Tất cả tin tức --}}
+            <a href="{{ route('news.index') }}" class="glass px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all">
+                Tất cả bài viết
+            </a>
         </div>
     
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             @if($featuredPost)
-            <div class="lg:col-span-7 group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl h-[500px]">
-                <img loading="lazy" src="{{ asset('storage/' . $featuredPost->image) }}" class="absolute inset-0 w-full h-full object-cover ...">
+            {{-- Bọc thẻ <a> ở ngoài hoặc ở nút Đọc tiếp đều được, tui để ở nút Đọc tiếp như thiết kế của ba --}}
+            <div class="lg:col-span-7 group relative overflow-hidden rounded-[2.5rem] border border-white/10 shadow-2xl h-[500px]">
+                <img loading="lazy" src="{{ asset('storage/' . $featuredPost->image) }}" class="absolute inset-0 w-full h-full object-cover transition-transform transform-gpu duration-1000 group-hover:scale-105">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/40 to-transparent"></div>
                 
                 <div class="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
@@ -379,14 +384,15 @@
                         </span>
                         <span class="text-gray-400 text-xs font-bold italic">{{ $featuredPost->created_at->format('d/m/Y') }}</span>
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-black text-white mb-4 leading-tight ...">
+                    <h3 class="text-3xl md:text-4xl font-black text-white mb-4 leading-tight group-hover:text-blue-400 transition-colors">
                         {{ $featuredPost->title }}
                     </h3>
                     <p class="text-gray-400 text-sm md:text-base line-clamp-2 max-w-2xl mb-6">
                         {{ $featuredPost->summary }}
                     </p>
-                    <a href="#" class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest">
-                        Đọc tiếp <span>→</span>
+                    {{-- Gắn Link cho Bài Nổi Bật --}}
+                    <a href="{{ route('news.show', $featuredPost->slug) }}" class="flex items-center gap-2 text-blue-400 font-bold uppercase text-xs tracking-widest hover:text-blue-300">
+                        Đọc tiếp <span class="group-hover:translate-x-2 transition-transform">→</span>
                     </a>
                 </div>
             </div>
@@ -394,12 +400,12 @@
     
             <div class="lg:col-span-5 flex flex-col gap-6">
                 @forelse($recentPosts as $post)
-                    <a href="#" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
+                    {{-- Gắn Link cho danh sách bài nhỏ --}}
+                    <a href="{{ route('news.show', $post->slug) }}" class="group flex gap-4 glass p-4 rounded-[2rem] border-white/5 hover:border-white/20 transition-all shadow-lg">
                         <div class="w-32 h-24 flex-shrink-0 overflow-hidden rounded-2xl border border-white/5">
-                            <img loading="lazy" src="{{ asset('storage/' . $post->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform ...">
+                            <img loading="lazy" src="{{ asset('storage/' . $post->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
                         </div>
                         <div class="flex flex-col justify-center">
-                            {{-- Đổi màu tag theo category --}}
                             @php
                                 $color = match($post->category) {
                                     'Sự kiện' => 'text-blue-500',
@@ -416,7 +422,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="text-gray-500 italic">Chưa có tin tức nào.</p>
+                    <p class="text-gray-500 italic px-4">Chưa có tin tức nào.</p>
                 @endforelse
             </div>
         </div>
