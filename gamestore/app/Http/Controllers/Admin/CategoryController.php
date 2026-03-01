@@ -10,26 +10,27 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
-    // 1. Hiển thị danh sách
+    // ==========================================
+    // 1. HIỂN THỊ DANH SÁCH & TÌM KIẾM
+    // ==========================================
     public function index(Request $request) {
         $keyword = $request->input('keyword');
         $status = $request->input('status');
 
         $categories = Category::latest();
 
-        // -- Lọc tìm kiếm từ khóa --
+        // Lọc theo từ khóa tên danh mục
         if ($keyword) {
             $categories->where('name', 'like', "%{$keyword}%");
         }
 
-        // -- Lọc trạng thái (ĐÃ SỬA: Dùng if thay vì when để tránh lỗi logic số 0) --
+        // Lọc theo trạng thái ẩn/hiện (Bỏ qua nếu chọn 'all')
         if ($status !== null && $status !== 'all') {
             $categories->where('is_active', $status);
         }
 
+        // Phân trang 5 mục và giữ lại các tham số lọc trên thanh URL
         $categories = $categories->paginate(5); 
-
-        // Giữ lại tham số khi chuyển trang
         $categories->appends([
             'keyword' => $keyword,
             'status' => $status
@@ -38,12 +39,14 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('categories'));
     }
 
-    // 2. Lưu danh mục mới
+    // ==========================================
+    // 2. THÊM MỚI DANH MỤC (CÓ XỬ LÝ ẢNH)
+    // ==========================================
     public function store(Request $request)
     {
+        // Kiểm tra dữ liệu đầu vào
         $request->validate([
             'name' => 'required|unique:categories,name|max:255',
-            // Thêm validate ảnh: Phải là ảnh, tối đa 2MB
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
             'name.required' => 'Vui lòng nhập tên danh mục.',
@@ -54,45 +57,43 @@ class CategoryController extends Controller
     
         $category = new Category();
         $category->name = $request->name;
-        // Tạo slug nếu không nhập
+        
+        // Tự động tạo slug từ tên (Ví dụ: "Hành Động" -> "hanh-dong")
         $slug = $request->slug ? Str::slug($request->slug) : Str::slug($request->name);
         $category->slug = $slug;
-        $category->is_active = 1; // Mặc định hiện
+        $category->is_active = 1; 
     
-        // --- XỬ LÝ ẢNH ---
+        // Xử lý lưu file ảnh vào thư mục storage/app/public/categories
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            // Tạo tên file theo slug để dễ quản lý: the-thao-123456.jpg
             $filename = $slug . '-' . time() . '.' . $file->getClientOriginalExtension();
-            // Lưu vào thư mục public/categories
             $path = $file->storeAs('categories', $filename, 'public');
             $category->image = $path;
         }
-        // ----------------
     
         $category->save();
-    
         return redirect()->route('admin.categories.index')->with('success', 'Thêm danh mục thành công!');
     }
 
-    // 3. Xóa mềm danh mục (vào thùng rác)
+    // ==========================================
+    // 3. XÓA TẠM THỜI (SOFT DELETE)
+    // ==========================================
     public function destroy(string $id)
     {
         $category = Category::findOrFail($id);
-    
-        // CHỈ XÓA MỀM - BỎ ĐOẠN XÓA ẢNH Ở ĐÂY
+        // Chỉ đánh dấu xóa (deleted_at), không xóa file ảnh và không mất dữ liệu DB
         $category->delete(); 
-    
-        return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển danh mục vào thùng rác!');
+        return redirect()->route('admin.categories.index')->with('success', 'Đã chuyển vào thùng rác!');
     }
 
-    // 4. Hiển thị form sửa
+    // ==========================================
+    // 4 & 5. CẬP NHẬT DANH MỤC
+    // ==========================================
     public function edit($id) {
         $category = Category::findOrFail($id);
         return view('admin.categories.edit', compact('category'));
     }
 
-    // 5. Cập nhật dữ liệu
     public function update(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
@@ -103,85 +104,78 @@ class CategoryController extends Controller
         ]);
     
         $category->name = $request->name;
-        // Cập nhật slug mới nếu tên thay đổi (tuỳ chọn)
         $newSlug = Str::slug($request->name);
         $category->slug = $newSlug;
     
-        // --- XỬ LÝ ẢNH KHI UPDATE ---
-        // --- XỬ LÝ ẢNH KHI UPDATE ---
+        // Nếu có tải lên ảnh mới: Xóa ảnh cũ trên đĩa rồi lưu ảnh mới
         if ($request->hasFile('image')) {
-            // 1. Lấy đường dẫn gốc của ảnh cũ (tránh lỗi nếu Model có Accessor)
-            $oldImagePath = $category->getRawOriginal('image');
+            $oldImagePath = $category->getRawOriginal('image'); // Lấy path gốc trong DB
             
-            // Nếu có ảnh cũ thì thực hiện xóa thẳng luôn
             if (!empty($oldImagePath)) {
                 Storage::disk('public')->delete($oldImagePath);
             }
 
-            // 2. Lưu ảnh mới
             $file = $request->file('image');
             $filename = $newSlug . '-' . time() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('categories', $filename, 'public');
             $category->image = $path;
         }
-        // ---------------------------
     
         $category->save();
-    
-        return redirect()->route('admin.categories.index')->with('success', 'Cập nhật danh mục thành công!');
+        return redirect()->route('admin.categories.index')->with('success', 'Cập nhật thành công!');
     }
 
-    // 6. Thùng rác
+    // ==========================================
+    // 6 & 7. QUẢN LÝ THÙNG RÁC & KHÔI PHỤC
+    // ==========================================
     public function trash() {
+        // Chỉ lấy những danh mục đã bị xóa mềm
         $categories = Category::onlyTrashed()->latest()->paginate(5);
         return view('admin.categories.trash', compact('categories'));
     }
 
-    // 7. Khôi phục
     public function restore($id) {
         $category = Category::withTrashed()->find($id);
-        
         if ($category) {
-            $category->restore(); 
-            return redirect()->back()->with('success', 'Đã khôi phục danh mục thành công!');
+            $category->restore(); // Gỡ bỏ đánh dấu xóa (set deleted_at = null)
+            return redirect()->back()->with('success', 'Đã khôi phục thành công!');
         }
-        
-        return redirect()->back()->with('error', 'Không tìm thấy danh mục!');
+        return redirect()->back()->with('error', 'Không tìm thấy!');
     }
 
-    // 8. Xóa vĩnh viễn 
+    // ==========================================
+    // 8. XÓA VĨNH VIỄN (FORCE DELETE)
+    // ==========================================
     public function forceDelete($id) {
         $category = Category::withTrashed()->find($id);
-        
         if ($category) {
-            // Lấy đường dẫn gốc và xóa file vật lý
+            // Xóa file ảnh vật lý trong folder storage trước khi xóa DB
             $imagePath = $category->getRawOriginal('image');
             if (!empty($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
             }
 
-            $category->forceDelete(); 
-            return redirect()->back()->with('success', 'Đã xóa vĩnh viễn danh mục!');
+            $category->forceDelete(); // Xóa mất xác trong Database
+            return redirect()->back()->with('success', 'Đã xóa vĩnh viễn!');
         }
-
-        return redirect()->back()->with('error', 'Không tìm thấy danh mục!');
+        return redirect()->back()->with('error', 'Không tìm thấy!');
     }
 
-    // 9. Bật tắt trạng thái (AJAX) - ĐÃ SỬA LỖI
+    // ==========================================
+    // 9. BẬT/TẮT TRẠNG THÁI (DÙNG CHO AJAX)
+    // ==========================================
     public function toggleStatus($id) {
         $category = Category::find($id);
 
-        // SỬA 1: Thêm dấu $ vào trước biến category
         if (!$category) {
-            // SỬA 2: Sửa chữ 'respone' thành 'response'
-            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy danh mục!'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Không tìm thấy!'], 404);
         }
 
-        // Đảo ngược trạng thái: Đang 1 thành 0, đang 0 thành 1
+        // Đảo trạng thái: 1 -> 0 hoặc 0 -> 1
         $category->is_active = !$category->is_active;
         $category->save();
 
-        // Trả về JSON để Javascript bên View nhận được
+        // Trả về kết quả để giao diện Frontend xử lý mà không cần load lại trang
         return response()->json([
             'status' => 'success',
             'message' => $category->is_active ? 'Đã hiện danh mục!' : 'Đã ẩn danh mục!',

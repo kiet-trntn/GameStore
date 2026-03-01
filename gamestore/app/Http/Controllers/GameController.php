@@ -7,8 +7,12 @@ use App\Models\Game;
 
 class GameController extends Controller
 {
+    /**
+     * HIỂN THỊ DANH SÁCH GAME + LỌC (FILTER)
+     */
     public function index(Request $request) {
-        // Khởi tạo query lấy game đang hoạt động và ĐÃ RA MẮT
+        // 1. Khởi tạo Query ban đầu: Chỉ lấy game đang hoạt động và ĐÃ RA MẮT
+        // (Nếu release_date là null hoặc nhỏ hơn/bằng thời gian hiện tại)
         $query = Game::with('category')
                     ->where('is_active', 1)
                     ->where(function($q) {
@@ -16,27 +20,27 @@ class GameController extends Controller
                           ->orWhereDate('release_date', '<=', now());
                     });
 
-        // Đếm tổng số game đang có để in ra chữ "Hiện có ... tựa game"
+        // Đếm tổng số game hiện có (không tính các filter bên dưới) để làm thống kê
         $totalGames = \App\Models\Game::where('is_active', 1)->count();
                     
-        // Nếu khách bấm từ Trang chủ -> Lọc theo Danh mục
+        // 2. Lọc theo DANH MỤC (Category)
         if ($request->has('category') && $request->category != '') {
             $categorySlug = $request->category;
-            // Tìm trong bảng categories xem có slug này không
+            // Kiểm tra quan hệ: Chỉ lấy game thuộc danh mục có slug tương ứng
             $query->whereHas('category', function($q) use ($categorySlug) {
                 $q->where('slug', $categorySlug);
             });
         }
 
-        // Nếu khách xài ô Tìm kiếm (Từ khóa)
+        // 3. Lọc theo TỪ KHÓA tìm kiếm (Search)
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where('title', 'LIKE', "%{$search}%");
         }
 
-        // LỌC THEO KHOẢNG GIÁ
+        // 4. Lọc theo KHOẢNG GIÁ
+        // COALESCE(sale_price, price): Nếu có giá sale thì lấy giá sale, nếu không lấy giá gốc để so sánh
         if ($request->has('price') && $request->price != '') {
-            // Dùng COALESCE để ưu tiên lấy sale_price (nếu có), không có thì lấy price gốc để so sánh
             if ($request->price == 'under_250') {
                 $query->whereRaw('COALESCE(sale_price, price) < 250000');
             } elseif ($request->price == '250_to_500') {
@@ -46,65 +50,63 @@ class GameController extends Controller
             }
         }
 
-        // LỌC THEO TRẠNG THÁI GIẢM GIÁ
+        // 5. Lọc game đang GIẢM GIÁ (On Sale)
         if ($request->has('on_sale') && $request->on_sale == 'true') {
-            $query->whereNotNull('sale_price') // Chỉ lấy game CÓ giá sale
-                  ->whereRaw('sale_price < price'); // Đề phòng admin nhập bậy sale_price > price
+            $query->whereNotNull('sale_price') 
+                  ->whereRaw('sale_price < price'); // Đảm bảo thực sự có giảm giá
         }
 
-        // Lấy dữ liệu, phân trang mỗi trang 9 game (appends để giữ lại url khi chuyển trang)
+        // 6. Thực thi Query, Phân trang 9 item/trang
+        // appends($request->all()): Giữ lại các tham số lọc trên URL khi bấm sang trang 2, 3...
         $games = $query->latest()->paginate(9)->appends($request->all());
 
-        // Lấy toàn bộ danh mục đang hoạt động để in ra Sidebar
+        // Lấy danh sách danh mục để hiển thị ở Sidebar (bộ lọc)
         $categories = \App\Models\Category::where('is_active', 1)->get();
 
-        // NẾU LÀ YÊU CẦU AJAX (TỪ JAVASCRIPT)
+        // 7. Xử lý yêu cầu AJAX: Nếu lọc bằng JavaScript thì chỉ trả về vùng chứa danh sách game
         if ($request->ajax()) {
-            // Chỉ trả về đoạn HTML chứa danh sách game
             return view('game.partials.game_grid', compact('games', 'categories'))->render();
         }
 
-
-
-        // Lấy Top 4 game Bán chạy (Tạm tính bằng Lượt xem - Views)
-        // Chỉ lấy những game đã ra mắt
+        // 8. Lấy Top 4 game hot dựa trên lượt xem (Views)
         $topSellingGames = Game::with('category')
                             ->where('is_active', 1)
                             ->where(function($q) {
                                 $q->whereNull('release_date')
                                   ->orWhereDate('release_date', '<=', now());
                             })
-                            ->orderBy('views', 'desc') // Xếp hạng theo Lượt xem giảm dần
-                            ->take(4) // Lấy đúng 4 game cho vừa cái Grid
+                            ->orderBy('views', 'desc') 
+                            ->take(4) 
                             ->get();
 
         return view('game.index', compact('games', 'categories', 'topSellingGames', 'totalGames'));
     }
 
-    // Hàm show nhận vào biến $slug từ thanh URL
+    /**
+     * HIỂN THỊ CHI TIẾT GAME
+     */
     public function show($slug) {
-        // 1. Tìm game đang hoạt động có slug tương ứng, kèm theo Danh mục (category)
+        // 1. Tìm game theo Slug (đường dẫn thân thiện)
         $game = Game::with('category')
                     ->where('slug', $slug)
                     ->where('is_active', 1)
-                    ->firstOrFail(); // Không tìm thấy thì quăng lỗi 404
+                    ->firstOrFail(); // Trả về trang 404 nếu không tìm thấy
 
-        // 2. MAGIC: Tự động cộng 1 vào cột views mỗi lần có người mở trang này!
+        // 2. Tăng lượt xem (Views): Mỗi lần load trang chi tiết thì cộng thêm 1
         $game->increment('views');
 
-        // 3. Lấy 4 Game Cùng Thể Loại (Gợi ý ở cuối trang, CHỈ LẤY GAME ĐÃ PHÁT HÀNH)
+        // 3. Lấy 4 Game liên quan (cùng thể loại)
         $relatedGames = Game::where('category_id', $game->category_id)
-                            ->where('id', '!=', $game->id) // Né game hiện tại ra
+                            ->where('id', '!=', $game->id) // Không lấy lại chính game đang xem
                             ->where('is_active', 1)
-                            ->where(function($q) {         // <-- THÊM KHỐI CHẶN GAME SẮP RA MẮT Ở ĐÂY
+                            ->where(function($q) {
                                 $q->whereNull('release_date')
                                   ->orWhereDate('release_date', '<=', now());
                             })
-                            ->inRandomOrder() // Lấy ngẫu nhiên
+                            ->inRandomOrder() // Sắp xếp ngẫu nhiên để tạo sự mới mẻ
                             ->take(4)
                             ->get();
 
-        // Đẩy dữ liệu ra giao diện
         return view('game.game_detail', compact('game', 'relatedGames'));
     }
 }

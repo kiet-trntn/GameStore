@@ -13,54 +13,54 @@ use App\Models\OrderItem;
 
 class CartController extends Controller
 {
-    // Hàm hiển thị trang Giỏ hàng
+    // ==========================================
+    // 1. HIỂN THỊ GIỎ HÀNG
+    // ==========================================
     public function index()
     {
-        // 1. Kiểm tra nếu chưa đăng nhập thì đá ra trang login
+        // Kiểm tra đăng nhập: Phải là thành viên mới cho xem giỏ hàng
         if (!Auth::check()) {
             return redirect()->route('login')->with('warning', 'Vui lòng đăng nhập để xem giỏ hàng nha ba!');
         }
 
-        // 2. Lấy toàn bộ sản phẩm trong giỏ của User này (Kèm theo thông tin Game)
+        // Lấy danh sách game trong giỏ của User hiện tại
+        // Eager Loading 'game' để tránh lỗi N+1 (truy vấn nhanh hơn)
         $cartItems = Cart::with('game')
                         ->where('user_id', Auth::id())
                         ->latest()
                         ->get();
 
-        // 3. Tính toán tổng tiền
+        // Duyệt qua danh sách để cộng dồn tổng tiền
         $subTotal = 0;
         foreach ($cartItems as $item) {
-            // Nếu game có sale_price thì lấy sale, không có thì lấy price gốc
+            // Ưu tiên lấy giá khuyến mãi nếu có, không thì lấy giá gốc
             $currentPrice = $item->game->sale_price ?? $item->game->price;
-            
-            // Do là game digital số lượng mặc định là 1, nhưng cứ nhân quantity cho chuẩn bài
             $subTotal += $currentPrice * $item->quantity; 
         }
 
-        // 4. Trả dữ liệu ra giao diện
+        // Đổ dữ liệu ra view cart.index
         return view('cart.index', compact('cartItems', 'subTotal'));
     }
 
-    // HÀM XỬ LÝ: THÊM GAME VÀO GIỎ HÀNG
+    // ==========================================
+    // 2. THÊM GAME VÀO GIỎ (AJAX & TRADITIONAL)
+    // ==========================================
     public function add(Request $request, $game_id)
     {
-        // 1. Kiểm tra đăng nhập (Bắt buộc)
+        // Chặn người dùng chưa đăng nhập
         if (!Auth::check()) {
-            // Trả về lỗi 401 (Chưa xác thực) nếu dùng AJAX, hoặc redirect về trang Login
             if ($request->ajax()) {
                 return response()->json(['status' => 'error', 'message' => 'Vui lòng đăng nhập để mua game!'], 401);
             }
             return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để mua game!');
         }
 
-        // 2. Kiểm tra Game có tồn tại và Đang hoạt động không
+        // Tìm game: Game phải tồn tại và đang được kích hoạt (is_active = 1)
         $game = Game::where('id', $game_id)->where('is_active', 1)->firstOrFail();
-
         $user_id = Auth::id();
 
-        // 3. Kiểm tra xem Game này đã nằm trong giỏ hàng của User chưa?
+        // Chống trùng: Game digital mỗi người thường chỉ mua 1 bản, không cho thêm lần nữa
         $exists = Cart::where('user_id', $user_id)->where('game_id', $game_id)->exists();
-
         if ($exists) {
             if ($request->ajax()) {
                 return response()->json(['status' => 'warning', 'message' => 'Game này đã có trong giỏ hàng của bạn rồi!']);
@@ -68,16 +68,15 @@ class CartController extends Controller
             return back()->with('warning', 'Game này đã có trong giỏ hàng của bạn rồi!');
         }
 
-        // 4. Lưu vào Database
+        // Lưu bản ghi vào bảng Carts
         Cart::create([
             'user_id' => $user_id,
             'game_id' => $game_id,
-            'quantity' => 1 // Mặc định là 1 vì bán Game Digital
+            'quantity' => 1 
         ]);
 
-        // Đếm lại tổng số game trong giỏ để cập nhật cái icon Giỏ hàng trên Menu
+        // Trả về kết quả JSON cho AJAX để cập nhật UI ngay lập tức không cần load trang
         $cartCount = Cart::where('user_id', $user_id)->count();
-
         if ($request->ajax()) {
             return response()->json([
                 'status' => 'success', 
@@ -89,16 +88,18 @@ class CartController extends Controller
         return back()->with('success', 'Đã thêm vào giỏ hàng thành công!');
     }
 
-    // HÀM XÓA GAME KHỎI GIỎ HÀNG (AJAX)
+    // ==========================================
+    // 3. XÓA GAME KHỎI GIỎ (AJAX)
+    // ==========================================
     public function remove(Request $request, $id)
     {
-        // Tìm game trong giỏ của đúng user này
+        // Tìm và xóa: Chỉ xóa đúng món đồ của chính user đó
         $cartItem = Cart::where('id', $id)->where('user_id', Auth::id())->first();
 
         if ($cartItem) {
-            $cartItem->delete(); // Xóa cái rụp
+            $cartItem->delete(); 
 
-            // Tính lại tổng tiền sau khi xóa
+            // Sau khi xóa, phải tính lại tổng tiền để giao diện cập nhật chính xác
             $cartItems = Cart::with('game')->where('user_id', Auth::id())->get();
             $subTotal = 0;
             foreach ($cartItems as $item) {
@@ -116,7 +117,9 @@ class CartController extends Controller
         return response()->json(['status' => 'error', 'message' => 'Không tìm thấy game trong giỏ!'], 404);
     }
 
-    // 1. HÀM TẠO ĐƠN VÀ ĐẨY SANG VNPAY
+    // ==========================================
+    // 4. THANH TOÁN & TẠO LINK VNPAY
+    // ==========================================
     public function checkout(Request $request)
     {
         $user_id = Auth::id();
@@ -127,24 +130,28 @@ class CartController extends Controller
         }
 
         try {
+            // Dùng Transaction: Nếu lưu Order lỗi thì không lưu OrderItem (đảm bảo sạch DB)
             DB::beginTransaction(); 
 
-            // Tính tiền
+            // Tính tổng tiền đơn hàng
             $totalAmount = 0;
             foreach ($cartItems as $item) {
                 $totalAmount += ($item->game->sale_price ?? $item->game->price) * $item->quantity;
             }
 
-            // TẠO HÓA ĐƠN TRẠNG THÁI "PENDING" (Chờ thanh toán)
+            // Tạo mã đơn hàng ngẫu nhiên (Ví dụ: GAMEX-A1B2C3)
             $order_code = 'GAMEX-' . strtoupper(Str::random(6));
+            
+            // Lưu thông tin hóa đơn tổng
             $order = Order::create([
                 'user_id' => $user_id,
                 'order_code' => $order_code,
                 'total_amount' => $totalAmount,
                 'payment_method' => 'VNPay',
-                'status' => 'pending' // Chờ VNPay xử lý xong mới đổi thành completed
+                'status' => 'pending' 
             ]);
 
+            // Lưu chi tiết từng sản phẩm trong hóa đơn
             foreach ($cartItems as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -152,9 +159,10 @@ class CartController extends Controller
                     'price' => $item->game->sale_price ?? $item->game->price 
                 ]);
             }
-            DB::commit(); 
+            
+            DB::commit(); // Mọi thứ ok, chốt lưu vào DB
 
-            // ===== CODE TẠO LINK VNPAY CHUẨN QUỐC TẾ =====
+            // --- KHỞI TẠO CẤU HÌNH VNPAY ---
             $vnp_Url = env('VNP_URL', "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
             $vnp_Returnurl = env('VNP_RETURN_URL', route('vnpay.return'));
             $vnp_TmnCode = env('VNP_TMN_CODE'); 
@@ -163,11 +171,12 @@ class CartController extends Controller
             $vnp_TxnRef = $order_code; 
             $vnp_OrderInfo = "Thanh toan don hang GameX: " . $order_code;
             $vnp_OrderType = 'billpayment';
-            $vnp_Amount = $totalAmount * 100; // VNPay quy định tiền phải nhân 100
+            $vnp_Amount = $totalAmount * 100; // VNPay tính theo đơn vị Đồng, không dùng số thập phân (nên x100)
             $vnp_Locale = 'vn';
-            $vnp_BankCode = ''; // Dùng thẻ test của ngân hàng NCB
+            $vnp_BankCode = ''; 
             $vnp_IpAddr = $_SERVER['REMOTE_ADDR'];
 
+            // Mảng dữ liệu gửi sang VNPay
             $inputData = array(
                 "vnp_Version" => "2.1.0",
                 "vnp_TmnCode" => $vnp_TmnCode,
@@ -186,6 +195,8 @@ class CartController extends Controller
             if (isset($vnp_BankCode) && $vnp_BankCode != "") {
                 $inputData['vnp_BankCode'] = $vnp_BankCode;
             }
+
+            // Sắp xếp mảng theo alphabet (Yêu cầu bắt buộc của VNPay)
             ksort($inputData);
             $query = "";
             $i = 0;
@@ -200,21 +211,25 @@ class CartController extends Controller
                 $query .= urlencode($key) . "=" . urlencode($value) . '&';
             }
 
+            // Tạo mã băm Secure Hash để VNPay kiểm tra tính toàn vẹn của dữ liệu
             $vnp_Url = $vnp_Url . "?" . $query;
             if (isset($vnp_HashSecret)) {
                 $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
                 $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
             }
-            // Trả cái Link VNPay về cho Javascript chuyển trang
+            
+            // Trả về link cho Frontend để redirect người dùng sang cổng thanh toán VNPay
             return response()->json(['status' => 'success', 'url' => $vnp_Url]);
 
         } catch (\Exception $e) {
-            DB::rollBack(); 
+            DB::rollBack(); // Lỗi phát là hủy toàn bộ lệnh Insert nãy giờ
             return response()->json(['status' => 'error', 'message' => 'Lỗi tạo đơn: ' . $e->getMessage()], 500);
         }
     }
 
-    // 2. HÀM HỨNG KẾT QUẢ TỪ VNPAY TRẢ VỀ
+    // ==========================================
+    // 5. XỬ LÝ KHI VNPAY TRẢ KẾT QUẢ VỀ
+    // ==========================================
     public function vnpayReturn(Request $request)
     {
         $vnp_HashSecret = env('VNP_HASH_SECRET');
@@ -224,6 +239,8 @@ class CartController extends Controller
                 $inputData[$key] = $value;
             }
         }
+        
+        // Xác thực chữ ký để đảm bảo kết quả này đúng là từ VNPay gửi về, không phải bị hack
         $vnp_SecureHash = $inputData['vnp_SecureHash'];
         unset($inputData['vnp_SecureHash']);
         ksort($inputData);
@@ -242,25 +259,27 @@ class CartController extends Controller
         if ($secureHash == $vnp_SecureHash) {
             $order = Order::where('order_code', $request->vnp_TxnRef)->first();
             
-            // Nếu giao dịch thành công (Mã 00)
+            // Nếu VNPay báo mã 00: Thanh toán thành công
             if ($request->vnp_ResponseCode == '00') {
-                $order->update(['status' => 'completed']); // Chốt đơn!
-                Cart::where('user_id', $order->user_id)->delete(); // Xóa giỏ hàng
+                $order->update(['status' => 'completed']); 
+                Cart::where('user_id', $order->user_id)->delete(); // Thanh toán xong thì dọn dẹp giỏ hàng
                 return redirect()->route('checkout.success')->with('order_code', $order->order_code);
             } else {
-                // Khách hủy giao dịch hoặc thẻ hết tiền
+                // Các mã lỗi khác (Khách hủy, không đủ tiền...): Cập nhật trạng thái 'cancelled'
                 $order->update(['status' => 'cancelled']);
                 return redirect()->route('cart.index')->with('error', 'Thanh toán thất bại hoặc đã bị hủy!');
             }
         } else {
-            return redirect()->route('cart.index')->with('error', 'Chữ ký VNPay không hợp lệ (Lỗi bảo mật)!');
+            return redirect()->route('cart.index')->with('error', 'Chữ ký VNPay không hợp lệ!');
         }
     }
 
-    // HÀM HIỂN THỊ TRANG THANH TOÁN THÀNH CÔNG
+    // ==========================================
+    // 6. TRANG HOÀN TẤT
+    // ==========================================
     public function success()
     {
-        // Chống hack: Nếu ai đó tự gõ link /thanh-cong mà không mua hàng thì đá về Trang chủ
+        // Chỉ cho phép vào nếu có mã đơn hàng từ session (vừa thanh toán xong)
         if (!session('order_code')) {
             return redirect()->route('home');
         }

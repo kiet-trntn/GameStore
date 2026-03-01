@@ -9,12 +9,18 @@ use App\Models\Post;
 
 class HomeController extends Controller
 {
-    // Hiển thị trang chủ
+    /**
+     * XỬ LÝ DỮ LIỆU HIỂN THỊ TẠI TRANG CHỦ
+     */
     public function index() {
-        /// 1. Danh mục
+        
+        // 1. LẤY DANH MỤC (CATEGORIES)
+        // Lấy 4 danh mục đang hoạt động và đếm xem mỗi danh mục có bao nhiêu tựa game (withCount)
         $categories = \App\Models\Category::where('is_active', 1)->withCount('games')->take(4)->get();
                                         
-        // 2. Slider Game Hot (Chỉ lấy game ĐÃ PHÁT HÀNH)
+        // 2. SLIDER GAME HOT (FEATURED)
+        // Chỉ lấy những game được đánh dấu là 'Nổi bật' (is_featured = 1)
+        // Quan trọng: Phải là game ĐÃ PHÁT HÀNH (release_date <= hiện tại hoặc là null)
         $hotGames = \App\Models\Game::where('is_active', 1)
                                     ->where('is_featured', 1)
                                     ->where(function($q) {
@@ -25,7 +31,8 @@ class HomeController extends Controller
                                     ->take(5)
                                     ->get();
 
-        // 3. Highlight: Game Mới (Chỉ lấy game ĐÃ PHÁT HÀNH, xếp theo mới nhất)
+        // 3. GAME MỚI (NEW ARRIVALS)
+        // Lấy 3 tựa game mới nhất vừa được thêm vào hệ thống (và đã phát hành)
         $newGames = \App\Models\Game::where('is_active', 1)
                                     ->where(function($q) {
                                         $q->whereNull('release_date')
@@ -35,7 +42,8 @@ class HomeController extends Controller
                                     ->take(3)
                                     ->get();
         
-        // 4. Highlight: Game Phổ Biến (Chỉ lấy game ĐÃ PHÁT HÀNH, xếp theo lượt xem)
+        // 4. GAME PHỔ BIẾN (POPULAR)
+        // Lấy 3 tựa game có lượt xem (views) cao nhất để hiển thị
         $popularGames = \App\Models\Game::where('is_active', 1)
                                         ->where(function($q) {
                                             $q->whereNull('release_date')
@@ -45,26 +53,31 @@ class HomeController extends Controller
                                         ->take(3)
                                         ->get();
         
-        // 5. Highlight: Sắp Ra Mắt (Chỉ lấy game CÓ NGÀY TRONG TƯƠNG LAI)
+        // 5. GAME SẮP RA MẮT (UPCOMING)
+        // Ngược lại với các mục trên, mục này CHỈ lấy game có ngày phát hành trong tương lai
+        // Sắp xếp 'asc' để game nào sắp đến ngày ra mắt nhất sẽ hiện lên đầu
         $upcomingGames = \App\Models\Game::where('is_active', 1)
                                         ->whereNotNull('release_date')
                                         ->whereDate('release_date', '>', now())
-                                        ->orderBy('release_date', 'asc') // Game nào sắp ra mắt nhất lên đầu
+                                        ->orderBy('release_date', 'asc') 
                                         ->take(3)
                                         ->get();
 
-        // Lấy 1 bài viết MỚI NHẤT và NỔI BẬT NHẤT (dành cho cái hình to đùng bên trái)
+        // 6. TIN TỨC NỔI BẬT (FEATURED POST)
+        // Lấy bài viết mới nhất để làm "Spotlight" (thường hiển thị to nhất bên trái)
         $featuredPost = Post::where('is_published', true)
                     ->orderBy('created_at', 'desc')
                     ->first();
 
-        // Lấy 3 bài viết tiếp theo (dành cho danh sách nhỏ bên phải)
+        // 7. TIN TỨC LIÊN QUAN (RECENT POSTS)
+        // Lấy 3 bài tiếp theo, trừ bài viết đã lấy ở mục số 6 (dùng where 'id' != ...)
         $recentPosts = Post::where('is_published', true)
-                   ->where('id', '!=', $featuredPost->id ?? 0) // Loại trừ cái bài đã lên hình bự
+                   ->where('id', '!=', $featuredPost->id ?? 0) 
                    ->orderBy('created_at', 'desc')
                    ->take(3)
                    ->get();
 
+        // Đổ toàn bộ dữ liệu ra view home.index bằng hàm compact
         return view('home.index', compact('categories', 'hotGames', 'newGames', 'popularGames', 'upcomingGames', 'featuredPost', 'recentPosts'));
     }
 }
